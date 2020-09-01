@@ -1,0 +1,243 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Drawing;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System.IO;
+using System.Windows.Media.Animation;
+using System.Threading;
+using System.Windows.Threading;
+using System.Security.Policy;
+
+namespace TVTK
+{
+    /// <summary>
+    /// Логика взаимодействия для MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        MediaElement mediaElement;
+        List<Uri> playList;
+        int queue;
+        DispatcherTimer timer;
+        bool playing = false;
+        bool StartWithoutTime = false;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0,1,0);
+        }
+
+        private void ButtonWithoutTimer_Click(object sender, RoutedEventArgs e)
+        {
+            timer.Stop();
+            StartWithoutTime = true;
+            timer.Tick -= new EventHandler(CheckPlayer);
+            StartPlayer();
+        }
+
+        private void ButtonStart_Click(object sender, RoutedEventArgs e)
+        {
+            StartWithoutTime = false;
+            timer.Tick += new EventHandler(CheckPlayer);
+            StartPlayer();
+            timer.Start();
+        }
+
+        public void CheckPlayer(object sender, EventArgs e) 
+        {
+            if (CheckTime() == true && playing == false && StartWithoutTime == false)
+            {
+                mediaElement.Play();
+            }
+        }
+
+        public bool CheckTime() 
+        {
+            TimeSpan timeSpanFrom = TimeSpan.Parse(tbxFrom.Text);
+            TimeSpan timeSpanBefore = TimeSpan.Parse(tbxBefore.Text);
+
+            TimeSpan timeSpanFromBreak = TimeSpan.Parse(tbxBreakFrom.Text);
+            TimeSpan timeSpanBeforeBreak = TimeSpan.Parse(tbxBreakBefore.Text);
+
+            TimeSpan dateTime =TimeSpan.Parse(DateTime.Now.ToString("HH:mm"));
+
+            if (dateTime >= timeSpanFrom && dateTime <= timeSpanBefore)
+            {
+                if (dateTime <= timeSpanFromBreak || dateTime >= timeSpanBeforeBreak)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        public void StartPlayer() 
+        {
+            queue = 1;
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            //  dialog.InitialDirectory = currentDirectory;
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                playList = GetVideos(dialog.FileName);
+                mediaElement = new MediaElement();
+                Thickness thickness = new Thickness(0);
+                mediaElement.Margin = thickness;
+
+                mediaElement.KeyDown += MediaElement_KeyDown;
+                mediaElement.MediaOpened += MediaElement_MediaOpened;
+                mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
+
+                Window window = new Window();
+                window.Width = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenWidth;
+                window.Height = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenHeight;
+                window.Content = mediaElement;
+                window.KeyDown += window_KeyDown;
+                window.Cursor = Cursors.None;
+                window.Show();
+                window.Activate();
+                window.Left = 0;
+                window.Top = 0;
+                window.WindowStyle = WindowStyle.None;
+                window.ResizeMode = ResizeMode.NoResize;
+                window.Background = new SolidColorBrush(Colors.Black);
+                
+                //  mediaElement.Style.Setters.Add(new Setter { Property = Control.BackgroundProperty, Value = new SolidColorBrush(Colors.Black) });
+
+                // mediaElement.MinWidth = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
+                // mediaElement.MinHeight = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
+                mediaElement.Height = window.Height;
+                mediaElement.Width = window.Width;
+                mediaElement.Stretch = Stretch.UniformToFill;
+                mediaElement.LoadedBehavior = MediaState.Manual;
+                mediaElement.UnloadedBehavior = MediaState.Manual;
+
+
+
+                //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                  
+                mediaElement.Source = playList.FirstOrDefault();
+                queue++;
+                if (StartWithoutTime)
+                {
+                    mediaElement.Play();
+                }
+            }
+        }
+
+        private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            playing = true;
+        }
+
+        void mediaElement_MediaEnded(object sender, RoutedEventArgs e)
+        {           
+            mediaElement.Close();
+            playing = false;
+            if (CheckTime() || StartWithoutTime)
+            {
+                if (queue > playList.Count)
+                {
+                    queue = 1;
+                }
+                mediaElement.Source = playList[queue - 1];
+                mediaElement.Position = TimeSpan.FromSeconds(0);
+                mediaElement.Play();
+                queue++;
+            }
+        }
+
+        public List<Uri> GetVideos(string path) 
+        {
+            var temp = new List<Uri>();
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            foreach (var item in directoryInfo.GetFiles())
+            {
+                if (item.Extension.ToLower() == ".mkv" || item.Extension.ToLower() == ".mp4" || item.Extension.ToLower() == ".avi"  || item.Extension.ToLower() == ".jpg" || item.Extension.ToLower() == ".mov")
+                {
+                    temp.Add(new UriBuilder(item.FullName).Uri);
+                }
+                
+                
+            }
+            lvFiles.ItemsSource = temp;
+            return temp;
+        }
+
+        private void MediaElement_KeyDown(object sender, KeyEventArgs e)
+        {
+            var temp = sender as MediaElement;
+            if (e.Key == Key.Escape)
+            {
+                (sender as MediaElement).Stop();
+                (sender as MediaElement).Close();
+                this.Close();
+
+            }
+        }
+
+        
+
+        private void window_KeyDown(object sender, KeyEventArgs e)
+        {
+            
+            //if (e.Key == Key.Escape)
+            //{
+            //    var temp = (sender as Window).Content;
+            //    //(temp as MediaElement).Close();
+            //    (sender as Window).Close();
+            //}
+            switch (e.Key)
+            {                           
+                case Key.Pause:                   
+                    mediaElement.Pause();
+                    break;           
+                case Key.Escape:
+                    timer.Tick -= new EventHandler(CheckPlayer);
+                    var temp = (sender as Window).Content;
+                    (temp as MediaElement).Close();
+                    (sender as Window).Close();
+                    break;              
+                case Key.Space:
+                    mediaElement.Pause();
+                    break;
+                case Key.Enter:
+                    mediaElement.Play();
+                    break;
+                case Key.Left:
+                    mediaElement.Position = mediaElement.Position - new TimeSpan(0,0,0,10);
+                    break;
+                case Key.Up:
+                    mediaElement.Volume += 0.05D; 
+                    break;
+                case Key.Right:
+                    var t = mediaElement.Position + new TimeSpan(0, 0, 0, 10);
+                    if (t >= mediaElement.NaturalDuration.TimeSpan)
+                    {
+                        t = mediaElement.NaturalDuration.TimeSpan;
+                    }
+                    mediaElement.Position = t;
+                    break;
+                case Key.Down:
+                    mediaElement.Volume -= 0.05D;
+                    break;                       
+            }
+        }
+    }
+}
