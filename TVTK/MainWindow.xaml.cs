@@ -20,12 +20,14 @@ using System.Windows.Media.Animation;
 using System.Threading;
 using System.Windows.Threading;
 using System.Security.Policy;
+using System.Collections.ObjectModel;
 
 namespace TVTK
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
+    /// 
     public partial class MainWindow : Window
     {
         MediaElement mediaElement;
@@ -34,12 +36,52 @@ namespace TVTK
         DispatcherTimer timer;
         bool playing = false;
         bool StartWithoutTime = false;
+        Window window;
+        bool showNews = false;
+
+        public ObservableCollection<Time> viewModelTime
+        {
+            get;
+            set;
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             timer = new DispatcherTimer();
             timer.Interval = new TimeSpan(0,1,0);
+            
+
+            if (Properties.Settings.Default.Time == null)
+            {
+                Properties.Settings.Default.Time = new List<Time>();
+            }
+
+            viewModelTime = new ObservableCollection<Time>(Properties.Settings.Default.Time);
+          //  viewModelTime.Concat(Properties.Settings.Default.Time);
+            viewModelTime.CollectionChanged += ViewModelTime_CollectionChanged;
+            if (viewModelTime.Count == 0)
+            {
+                viewModelTime.Add(new Time { From = "08:00", Before = "09:00" });
+                viewModelTime.Add(new Time { From = "11:30", Before = "13:00" });
+                viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
+            }
+            //else
+            //{
+            //    //if (Properties.Settings.Default.Time!=)
+            //    //{
+
+            //    //}
+            //    viewModelTime.Concat(Properties.Settings.Default.Time);
+            //}
+            dgTime.ItemsSource = viewModelTime;            
+        }
+
+        private void ViewModelTime_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            
+            Properties.Settings.Default.Time = viewModelTime.ToList<Time>();
+            Properties.Settings.Default.Save();
         }
 
         private void ButtonWithoutTimer_Click(object sender, RoutedEventArgs e)
@@ -68,17 +110,16 @@ namespace TVTK
 
         public bool CheckTime() 
         {
-            TimeSpan timeSpanFrom = TimeSpan.Parse(tbxFrom.Text);
-            TimeSpan timeSpanBefore = TimeSpan.Parse(tbxBefore.Text);
+            TimeSpan timeSpanFrom;
+            TimeSpan timeSpanBefore;
+            TimeSpan dateTime = TimeSpan.Parse(DateTime.Now.ToString("HH:mm"));
 
-            TimeSpan timeSpanFromBreak = TimeSpan.Parse(tbxBreakFrom.Text);
-            TimeSpan timeSpanBeforeBreak = TimeSpan.Parse(tbxBreakBefore.Text);
-
-            TimeSpan dateTime =TimeSpan.Parse(DateTime.Now.ToString("HH:mm"));
-
-            if (dateTime >= timeSpanFrom && dateTime <= timeSpanBefore)
+            foreach (var item in viewModelTime)
             {
-                if (dateTime <= timeSpanFromBreak || dateTime >= timeSpanBeforeBreak)
+                timeSpanFrom = TimeSpan.Parse(item.From);
+                timeSpanBefore = TimeSpan.Parse(item.Before);
+
+                 if (dateTime >= timeSpanFrom && dateTime <= timeSpanBefore)
                 {
                     return true;
                 }
@@ -96,6 +137,7 @@ namespace TVTK
             dialog.Multiselect = false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                
                 playList = GetVideos(dialog.FileName);
                 mediaElement = new MediaElement();
                 Thickness thickness = new Thickness(0);
@@ -105,13 +147,20 @@ namespace TVTK
                 mediaElement.MediaOpened += MediaElement_MediaOpened;
                 mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
 
-                Window window = new Window();
+                window = null;
+                window = new Window();
                 window.Width = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenWidth;
                 window.Height = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenHeight;
-                window.Content = mediaElement;
+                Canvas canvas = new Canvas();
+                canvas.Width = window.Width;
+                canvas.Height = window.Height;
+                window.Content = canvas;
+                canvas.Children.Add(mediaElement);
+              //  window.Content = mediaElement;
                 window.KeyDown += window_KeyDown;
                 window.Cursor = Cursors.None;
                 window.Show();
+                CreateNewWindow(canvas);
                 window.Activate();
                 window.Left = 0;
                 window.Top = 0;
@@ -138,8 +187,12 @@ namespace TVTK
                 {
                     mediaElement.Play();
                 }
+
+                // CompositionTarget.Rendering += CompositionTarget_Rendering;
+                timer.Tick += new EventHandler(NewsStart);
             }
         }
+
 
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
@@ -176,6 +229,8 @@ namespace TVTK
                 
                 
             }
+            lvFiles.ItemsSource = null;
+            lvFiles.Items.Clear();
             lvFiles.ItemsSource = temp;
             return temp;
         }
@@ -211,8 +266,10 @@ namespace TVTK
                 case Key.Escape:
                     timer.Tick -= new EventHandler(CheckPlayer);
                     var temp = (sender as Window).Content;
-                    (temp as MediaElement).Close();
+                    (temp as MediaElement)?.Close();
                     (sender as Window).Close();
+                    playList.Clear();
+                    playing = false;
                     break;              
                 case Key.Space:
                     mediaElement.Pause();
@@ -238,6 +295,70 @@ namespace TVTK
                     mediaElement.Volume -= 0.05D;
                     break;                       
             }
+        }
+
+        private void btnAddTime_Click(object sender, RoutedEventArgs e)
+        {
+            var time = new Time();
+
+            time.Before = tbxBreakBefore.Text;
+            time.From = tbxBreakFrom.Text; 
+            viewModelTime.Add(time);
+
+        }
+        
+        private void btnDelTime_Click(object sender, RoutedEventArgs e)
+        {
+            //   viewModelTime.Remove(viewModelTime.LastOrDefault());
+            Time t = dgTime.SelectedItem as Time;
+            viewModelTime.Remove(t);
+        }
+
+        static void CreateNewWindow(Canvas canvas)
+        {
+            StackPanel contentControlNews = new StackPanel();
+
+            contentControlNews.Width = canvas.Width / 2;
+            contentControlNews.Height = canvas.Height / 2;
+
+            //contentControlNews.Background = new SolidColorBrush(Colors.White);
+             contentControlNews.Background = new SolidColorBrush(Colors.Transparent);
+            //  ImageBrush imageBrush = new ImageBrush(new BitmapImage(new Uri(@".\TKS.png", UriKind.Relative)));
+            //   contentControlNews.Background = imageBrush;
+            MediaElement mediaElement = new MediaElement();
+            mediaElement.Source = new Uri(@".\TKS.png", UriKind.Relative);
+            mediaElement.Width = contentControlNews.Width;
+            mediaElement.Height = contentControlNews.Height;
+            contentControlNews.Children.Add(mediaElement);
+            contentControlNews.Margin = new Thickness(canvas.Width, canvas.Height/2, -contentControlNews.Width, 0);
+            canvas.Children.Add(contentControlNews);
+            canvas.Children[1].Visibility = Visibility.Visible;
+
+        }
+
+        public void NewsStart(object sender, EventArgs e)
+        {
+            Canvas canvas = window.Content as Canvas;
+            StackPanel contentControlNews = canvas.Children[1] as StackPanel;
+            ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
+
+            if (showNews == false)
+            {
+                thicknessAnimation.From = contentControlNews.Margin;
+                thicknessAnimation.To = new Thickness(canvas.Width / 2, canvas.Height / 2, 0, 0);
+                showNews = true;
+            }
+            else
+            {
+                thicknessAnimation.From = contentControlNews.Margin;
+                thicknessAnimation.To = new Thickness(canvas.Width, canvas.Height / 2, 0, 0);
+                showNews = false;
+            }
+            
+
+            thicknessAnimation.Duration = TimeSpan.FromSeconds(5);
+            contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
+         
         }
     }
 }
