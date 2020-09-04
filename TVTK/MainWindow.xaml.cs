@@ -30,16 +30,16 @@ namespace TVTK
     /// 
     public partial class MainWindow : Window
     {
-        MediaElement mediaElement;
-        List<Uri> playList;
-        int queue;
-        DispatcherTimer timer;
-        bool playing = false;
-        bool StartWithoutTime = false;
-        Window window;
-        bool showNews = false;
+        MediaElement mediaElement; // Проигрыватель видео и рекламы
+        List<Uri> playList; // плейлист рекламы
+        int queue; // текущее значение индекса плейлиста
+        DispatcherTimer timer;//Таймер для проверки текущего времени и запуска/остановки проигрывания видео/новостей.
+        bool playing = false; // маркре, позволяющий определить текущее состояние проигрывателя видео/рекламы
+        bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
+        Window window;//окно проигрывателя рекламы/видео
+        bool showNews = false; //маркер, позволяющий понять текущее состояние показа новостей.
 
-        public ObservableCollection<Time> viewModelTime
+        public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
         {
             get;
             set;
@@ -49,31 +49,25 @@ namespace TVTK
         {
             InitializeComponent();
             timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0,1,0);
+            timer.Interval = new TimeSpan(0,1,0); //Таймер проверяет время каждую минуту
             
 
-            if (Properties.Settings.Default.Time == null)
+            if (Properties.Settings.Default.Time == null) //первичная инициализация параметра времени работы. Если он пустой, то надо создать.
             {
                 Properties.Settings.Default.Time = new List<Time>();
             }
 
             viewModelTime = new ObservableCollection<Time>(Properties.Settings.Default.Time);
-          //  viewModelTime.Concat(Properties.Settings.Default.Time);
+
             viewModelTime.CollectionChanged += ViewModelTime_CollectionChanged;
-            if (viewModelTime.Count == 0)
+
+            if (viewModelTime.Count == 0)//если в параметре времени работы нет параметров,то надо их инициализировать дефолтными значениями
             {
                 viewModelTime.Add(new Time { From = "08:00", Before = "09:00" });
                 viewModelTime.Add(new Time { From = "11:30", Before = "13:00" });
                 viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
             }
-            //else
-            //{
-            //    //if (Properties.Settings.Default.Time!=)
-            //    //{
 
-            //    //}
-            //    viewModelTime.Concat(Properties.Settings.Default.Time);
-            //}
             dgTime.ItemsSource = viewModelTime;            
         }
 
@@ -84,7 +78,7 @@ namespace TVTK
             Properties.Settings.Default.Save();
         }
 
-        private void ButtonWithoutTimer_Click(object sender, RoutedEventArgs e)
+        private void ButtonWithoutTimer_Click(object sender, RoutedEventArgs e)//Запуск проигрывателя без проверки времени.
         {
             timer.Stop();
             StartWithoutTime = true;
@@ -92,7 +86,7 @@ namespace TVTK
             StartPlayer();
         }
 
-        private void ButtonStart_Click(object sender, RoutedEventArgs e)
+        private void ButtonStart_Click(object sender, RoutedEventArgs e)//Запуск проигрывателя с проверкой времени работы
         {
             StartWithoutTime = false;
             timer.Tick += new EventHandler(CheckPlayer);
@@ -100,7 +94,7 @@ namespace TVTK
             timer.Start();
         }
 
-        public void CheckPlayer(object sender, EventArgs e) 
+        public void CheckPlayer(object sender, EventArgs e) //Запуск плеера если наступило рабочее время.
         {
             if (CheckTime() == true && playing == false && StartWithoutTime == false)
             {
@@ -108,7 +102,7 @@ namespace TVTK
             }
         }
 
-        public bool CheckTime() 
+        public bool CheckTime() //Проверка времени работы. Происходит каждую минуту по таймеру.
         {
             TimeSpan timeSpanFrom;
             TimeSpan timeSpanBefore;
@@ -128,7 +122,7 @@ namespace TVTK
         }
 
 
-        public void StartPlayer() 
+        public void StartPlayer() //Создание окна проигрывателя и его запуск.
         {
             queue = 1;
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
@@ -197,9 +191,9 @@ namespace TVTK
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             playing = true;
-        }
+        }//Выполняется при открытии файла плеером.
 
-        void mediaElement_MediaEnded(object sender, RoutedEventArgs e)
+        void mediaElement_MediaEnded(object sender, RoutedEventArgs e)//Выполняется при окончаниипроигрывания ролика
         {           
             mediaElement.Close();
             playing = false;
@@ -216,7 +210,7 @@ namespace TVTK
             }
         }
 
-        public List<Uri> GetVideos(string path) 
+        public List<Uri> GetVideos(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
         {
             var temp = new List<Uri>();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
@@ -249,15 +243,10 @@ namespace TVTK
 
         
 
-        private void window_KeyDown(object sender, KeyEventArgs e)
+        private void window_KeyDown(object sender, KeyEventArgs e)//управление проигрыванием плеер и новостей
         {
             
-            //if (e.Key == Key.Escape)
-            //{
-            //    var temp = (sender as Window).Content;
-            //    //(temp as MediaElement).Close();
-            //    (sender as Window).Close();
-            //}
+
             switch (e.Key)
             {                           
                 case Key.Pause:                   
@@ -297,7 +286,7 @@ namespace TVTK
             }
         }
 
-        private void btnAddTime_Click(object sender, RoutedEventArgs e)
+        private void btnAddTime_Click(object sender, RoutedEventArgs e)//Добавление времени работы
         {
             var time = new Time();
 
@@ -307,14 +296,13 @@ namespace TVTK
 
         }
         
-        private void btnDelTime_Click(object sender, RoutedEventArgs e)
+        private void btnDelTime_Click(object sender, RoutedEventArgs e)//Удаление выделенного времени работы
         {
-            //   viewModelTime.Remove(viewModelTime.LastOrDefault());
             Time t = dgTime.SelectedItem as Time;
             viewModelTime.Remove(t);
         }
 
-        static void CreateNewWindow(Canvas canvas)
+        static void CreateNewWindow(Canvas canvas)//Создание окна новостей
         {
             StackPanel contentControlNews = new StackPanel();
 
@@ -336,7 +324,7 @@ namespace TVTK
 
         }
 
-        public void NewsStart(object sender, EventArgs e)
+        public void NewsStart(object sender, EventArgs e)//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
             Canvas canvas = window.Content as Canvas;
             StackPanel contentControlNews = canvas.Children[1] as StackPanel;
