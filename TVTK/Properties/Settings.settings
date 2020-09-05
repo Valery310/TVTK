@@ -8,5 +8,20 @@
     <Setting Name="Temp" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Height" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">2160</Value>
+    </Setting>
+    <Setting Name="Width" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">3840</Value>
+    </Setting>
+    <Setting Name="TypeWork" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="IPServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NameClient" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

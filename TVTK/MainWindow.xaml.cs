@@ -21,6 +21,7 @@ using System.Threading;
 using System.Windows.Threading;
 using System.Security.Policy;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace TVTK
 {
@@ -38,6 +39,8 @@ namespace TVTK
         bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
         Window window;//окно проигрывателя рекламы/видео
         bool showNews = false; //маркер, позволяющий понять текущее состояние показа новостей.
+        TypeWork typeWork;
+
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
         {
@@ -48,9 +51,24 @@ namespace TVTK
         public MainWindow()
         {
             InitializeComponent();
+            tbxHeight.Text = Properties.Settings.Default.Height.ToString();
+            tbxWidth.Text = Properties.Settings.Default.Width.ToString();
+            typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
             timer = new DispatcherTimer();
             timer.Interval = new TimeSpan(0,1,0); //Таймер проверяет время каждую минуту
-            
+
+            switch (typeWork)
+            {
+                case (TypeWork)TypeWork.Local: 
+                    rbLocal.IsChecked = true;
+                    break;
+                case (TypeWork)TypeWork.Mixed:
+                    rbMixed.IsChecked = true;
+                    break;
+                case (TypeWork)TypeWork.Network:
+                    rbNetwork.IsChecked = true;
+                    break;
+            }
 
             if (Properties.Settings.Default.Time == null) //первичная инициализация параметра времени работы. Если он пустой, то надо создать.
             {
@@ -143,8 +161,8 @@ namespace TVTK
 
                 window = null;
                 window = new Window();
-                window.Width = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenWidth;
-                window.Height = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2); // System.Windows.SystemParameters.FullPrimaryScreenHeight;
+                window.Width = Properties.Settings.Default.Width; // System.Windows.SystemParameters.FullPrimaryScreenWidth;
+                window.Height = Properties.Settings.Default.Height; // System.Windows.SystemParameters.FullPrimaryScreenHeight;
                 Canvas canvas = new Canvas();
                 canvas.Width = window.Width;
                 canvas.Height = window.Height;
@@ -347,6 +365,97 @@ namespace TVTK
             thicknessAnimation.Duration = TimeSpan.FromSeconds(5);
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
          
+        }
+
+        private void btnApplySetting_Click(object sender, RoutedEventArgs e)
+        {
+            int i, b;
+            bool settings = true;
+            string error = "Проверьте следующие настройки:";
+            if (int.TryParse(tblHeight.Text, out i) && int.TryParse(tblWidth.Text,out b))
+            {
+                Properties.Settings.Default.Height = (uint)i;
+                Properties.Settings.Default.Width = (uint)b;
+                typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
+
+                if (typeWork == TypeWork.Mixed || typeWork == TypeWork.Network)
+                {
+
+                    if (string.IsNullOrWhiteSpace(tbxNameClient.Text))
+                    {
+                        settings = false;
+                        error += "\nИмя клиента не должно быть пустым. Введите имя клиента";
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.NameClient = tbxNameClient.Text;
+                    }
+                    if (string.IsNullOrWhiteSpace(tbxIPServer.Text))
+                    {
+                        settings = false;
+                        error += "\nIP адрес сервера не должен быть пустым. Введите адрес сервера.";
+                    }
+                    else
+                    {
+                        Regex regex = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
+                        if (regex.IsMatch(tbxIPServer.Text))
+                        {
+                            Properties.Settings.Default.IPServer = tbxIPServer.Text;
+                        }
+                        else
+                        {
+                            settings = false;
+                            error += "\nIP адрес сервера должен соотвествовать маске: \"ххх.ххх.ххх.ххх\". Введите адрес сервера.";
+                        }
+                        
+                    }
+
+                }
+            }
+            else
+            {
+                settings = false;
+                error += "Настройки размеров экрана не применены. Вводить можно только цифры.";
+            }
+
+            if (settings)
+            {
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                MessageBox.Show(error);
+            }
+        }
+
+        public enum TypeWork
+        {
+            Local,
+            Network,
+            Mixed
+        }
+
+        private void rbtypeWork_Checked(object sender, RoutedEventArgs e)
+        {
+            var rb = sender as RadioButton;
+            switch ((TypeWork)Convert.ToInt32(rb.Tag))
+            {
+                case TypeWork.Local:
+                    tbxIPServer.IsEnabled = false;
+                    tbxNameClient.IsEnabled = false;
+                    typeWork = TypeWork.Local;
+                    break;
+                case TypeWork.Network:
+                    tbxIPServer.IsEnabled = true;
+                    tbxNameClient.IsEnabled = true;
+                    typeWork = TypeWork.Network;
+                    break;
+                case TypeWork.Mixed:
+                    tbxIPServer.IsEnabled = true;
+                    tbxNameClient.IsEnabled = true;
+                    typeWork = TypeWork.Mixed;
+                    break;
+            }
         }
     }
 }
