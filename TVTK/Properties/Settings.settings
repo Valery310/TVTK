@@ -9,19 +9,25 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Height" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">2160</Value>
+      <Value Profile="(Default)">1080</Value>
     </Setting>
     <Setting Name="Width" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">3840</Value>
+      <Value Profile="(Default)">1920</Value>
     </Setting>
     <Setting Name="TypeWork" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="IPServer" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="AdressServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
     </Setting>
     <Setting Name="NameClient" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">TV1</Value>
+    </Setting>
+    <Setting Name="PortServer" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">64647</Value>
+    </Setting>
+    <Setting Name="Stream" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Stream1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

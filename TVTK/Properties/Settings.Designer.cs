@@ -48,7 +48,7 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2160")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1080")]
         public uint Height {
             get {
                 return ((uint)(this["Height"]));
@@ -60,7 +60,7 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3840")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1920")]
         public uint Width {
             get {
                 return ((uint)(this["Width"]));
@@ -72,7 +72,7 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public uint TypeWork {
             get {
                 return ((uint)(this["TypeWork"]));
@@ -84,25 +84,49 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string IPServer {
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string AdressServer {
             get {
-                return ((string)(this["IPServer"]));
+                return ((string)(this["AdressServer"]));
             }
             set {
-                this["IPServer"] = value;
+                this["AdressServer"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("TV1")]
         public string NameClient {
             get {
                 return ((string)(this["NameClient"]));
             }
             set {
                 this["NameClient"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("64647")]
+        public int PortServer {
+            get {
+                return ((int)(this["PortServer"]));
+            }
+            set {
+                this["PortServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Stream1")]
+        public string Stream {
+            get {
+                return ((string)(this["Stream"]));
+            }
+            set {
+                this["Stream"] = value;
             }
         }
     }

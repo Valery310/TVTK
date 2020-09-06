@@ -22,6 +22,14 @@ using System.Windows.Threading;
 using System.Security.Policy;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Net;
+using System.Net.Sockets;
+using System.Net.Http;
+using System.Web.Helpers;
+using Newtonsoft.Json;
+using System.Text.Encodings.Web;
+using System.Web;
 
 namespace TVTK
 {
@@ -56,6 +64,9 @@ namespace TVTK
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
             timer = new DispatcherTimer();
             timer.Interval = new TimeSpan(0,1,0); //Таймер проверяет время каждую минуту
+            tbxIPServer.Text = Properties.Settings.Default.AdressServer;
+            tbxIPServer_Port.Text = Properties.Settings.Default.PortServer.ToString();
+            tbxNameClient.Text = Properties.Settings.Default.NameClient;
 
             switch (typeWork)
             {
@@ -140,59 +151,34 @@ namespace TVTK
         }
 
 
-        public void StartPlayer() //Создание окна проигрывателя и его запуск.
+        public async void StartPlayer() //Создание окна проигрывателя и его запуск.
         {
             queue = 1;
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-            //  dialog.InitialDirectory = currentDirectory;
-            dialog.Multiselect = false;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+
+            switch (Properties.Settings.Default.TypeWork)
             {
-                
-                playList = GetVideos(dialog.FileName);
-                mediaElement = new MediaElement();
-                Thickness thickness = new Thickness(0);
-                mediaElement.Margin = thickness;
+                case (uint)TypeWork.Local:
+                    CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+                    dialog.IsFolderPicker = true;
+                    //  dialog.InitialDirectory = currentDirectory;
+                    dialog.Multiselect = false;
+                    if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        playList = GetVideosLocal(dialog.FileName);
+                        CreatePlayer();
+                        //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                                 
+                    }
+                    break;
+                case (uint)TypeWork.Network:
+                    playList = GetVideosLan(await GetPropertiesFromServer());
+                    CreatePlayer();
+                    break;
+                case (uint)TypeWork.Mixed:
+                    break;
+            }
 
-                mediaElement.KeyDown += MediaElement_KeyDown;
-                mediaElement.MediaOpened += MediaElement_MediaOpened;
-                mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
-
-                window = null;
-                window = new Window();
-                window.Width = Properties.Settings.Default.Width; // System.Windows.SystemParameters.FullPrimaryScreenWidth;
-                window.Height = Properties.Settings.Default.Height; // System.Windows.SystemParameters.FullPrimaryScreenHeight;
-                Canvas canvas = new Canvas();
-                canvas.Width = window.Width;
-                canvas.Height = window.Height;
-                window.Content = canvas;
-                canvas.Children.Add(mediaElement);
-              //  window.Content = mediaElement;
-                window.KeyDown += window_KeyDown;
-                window.Cursor = Cursors.None;
-                window.Show();
-                CreateNewWindow(canvas);
-                window.Activate();
-                window.Left = 0;
-                window.Top = 0;
-                window.WindowStyle = WindowStyle.None;
-                window.ResizeMode = ResizeMode.NoResize;
-                window.Background = new SolidColorBrush(Colors.Black);
-                
-                //  mediaElement.Style.Setters.Add(new Setter { Property = Control.BackgroundProperty, Value = new SolidColorBrush(Colors.Black) });
-
-                // mediaElement.MinWidth = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
-                // mediaElement.MinHeight = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
-                mediaElement.Height = window.Height;
-                mediaElement.Width = window.Width;
-                mediaElement.Stretch = Stretch.UniformToFill;
-                mediaElement.LoadedBehavior = MediaState.Manual;
-                mediaElement.UnloadedBehavior = MediaState.Manual;
-
-
-
-                //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                  
+            if (playList != null)
+            {
                 mediaElement.Source = playList.FirstOrDefault();
                 queue++;
                 if (StartWithoutTime)
@@ -203,8 +189,54 @@ namespace TVTK
                 // CompositionTarget.Rendering += CompositionTarget_Rendering;
                 timer.Tick += new EventHandler(NewsStart);
             }
+            else
+            {
+                MessageBox.Show("Плейлист пуст.");
+            }
+           
         }
 
+        public void CreatePlayer() 
+        {
+            mediaElement = new MediaElement();
+            Thickness thickness = new Thickness(0);
+            mediaElement.Margin = thickness;
+
+            mediaElement.KeyDown += MediaElement_KeyDown;
+            mediaElement.MediaOpened += MediaElement_MediaOpened;
+            mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
+
+            window = null;
+            window = new Window();
+            window.Width = Properties.Settings.Default.Width; // System.Windows.SystemParameters.FullPrimaryScreenWidth;
+            window.Height = Properties.Settings.Default.Height; // System.Windows.SystemParameters.FullPrimaryScreenHeight;
+            Canvas canvas = new Canvas();
+            canvas.Width = window.Width;
+            canvas.Height = window.Height;
+            window.Content = canvas;
+            canvas.Children.Add(mediaElement);
+            //  window.Content = mediaElement;
+            window.KeyDown += window_KeyDown;
+            window.Cursor = Cursors.None;
+            window.Show();
+            CreateNewWindow(canvas);
+            window.Activate();
+            window.Left = 0;
+            window.Top = 0;
+            window.WindowStyle = WindowStyle.None;
+            window.ResizeMode = ResizeMode.NoResize;
+            window.Background = new SolidColorBrush(Colors.Black);
+
+            //  mediaElement.Style.Setters.Add(new Setter { Property = Control.BackgroundProperty, Value = new SolidColorBrush(Colors.Black) });
+
+            // mediaElement.MinWidth = Convert.ToInt32(tbxWidth.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
+            // mediaElement.MinHeight = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
+            mediaElement.Height = window.Height;
+            mediaElement.Width = window.Width;
+            mediaElement.Stretch = Stretch.UniformToFill;
+            mediaElement.LoadedBehavior = MediaState.Manual;
+            mediaElement.UnloadedBehavior = MediaState.Manual;
+        }
 
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
@@ -228,7 +260,7 @@ namespace TVTK
             }
         }
 
-        public List<Uri> GetVideos(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
+        public List<Uri> GetVideosLocal(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
         {
             var temp = new List<Uri>();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
@@ -237,14 +269,52 @@ namespace TVTK
                 if (item.Extension.ToLower() == ".mkv" || item.Extension.ToLower() == ".mp4" || item.Extension.ToLower() == ".avi"  || item.Extension.ToLower() == ".jpg" || item.Extension.ToLower() == ".mov")
                 {
                     temp.Add(new UriBuilder(item.FullName).Uri);
-                }
-                
-                
+                }            
             }
             lvFiles.ItemsSource = null;
             lvFiles.Items.Clear();
             lvFiles.ItemsSource = temp;
             return temp;
+        }
+
+        public List<Uri> GetVideosLan(List<List<MultimediaFile>> multimediaFiles) 
+        {
+            var Temp = new List<Uri>();
+            foreach (var items in multimediaFiles)
+            {
+                foreach (var item in items)
+                {
+                    Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (Type)item.type + "&id=" + item.id).Uri);
+                }
+            }
+            
+            return Temp;
+        }
+
+        public async Task<List<List<MultimediaFile>>> GetPropertiesFromServer() 
+        {
+            var addressServer = new UriBuilder("http", Properties.Settings.Default.AdressServer, Properties.Settings.Default.PortServer).Uri;
+            //     var Stream = Properties.Settings.Default.Stream;
+
+            var localAdress = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
+            var iPAddressLocal = localAdress.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork
+            && !IPAddress.IsLoopback(ip)
+            && !ip.ToString().StartsWith("169.254."));
+
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync(addressServer + "getmultimedia");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var product = await response.Content.ReadAsStringAsync();
+                var obj = JsonConvert.DeserializeObject<List<List<MultimediaFile>>>(product);
+                return obj;//  playList = GetVideosLan(obj);
+            }
+            else
+            {
+                MessageBox.Show("Нет ответа от сервера.");
+                return null;
+            }
         }
 
         private void MediaElement_KeyDown(object sender, KeyEventArgs e)
@@ -259,8 +329,6 @@ namespace TVTK
             }
         }
 
-        
-
         private void window_KeyDown(object sender, KeyEventArgs e)//управление проигрыванием плеер и новостей
         {
             
@@ -272,8 +340,8 @@ namespace TVTK
                     break;           
                 case Key.Escape:
                     timer.Tick -= new EventHandler(CheckPlayer);
-                    var temp = (sender as Window).Content;
-                    (temp as MediaElement)?.Close();
+                    var temp = (sender as Window).Content as Canvas;
+                    (temp.Children[0] as MediaElement)?.Close();
                     (sender as Window).Close();
                     playList.Clear();
                     playing = false;
@@ -390,26 +458,26 @@ namespace TVTK
                     {
                         Properties.Settings.Default.NameClient = tbxNameClient.Text;
                     }
-                    if (string.IsNullOrWhiteSpace(tbxIPServer.Text))
+                    if (string.IsNullOrWhiteSpace(tbxIPServer.Text) && string.IsNullOrWhiteSpace(tbxIPServer_Port.Text))
                     {
                         settings = false;
-                        error += "\nIP адрес сервера не должен быть пустым. Введите адрес сервера.";
+                        error += "\nIP адрес сервера и порт не должен быть пустыми. Введите адрес сервера.";
                     }
                     else
                     {
                         Regex regex = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
-                        if (regex.IsMatch(tbxIPServer.Text))
+                        int x;
+                        if (regex.IsMatch(tbxIPServer.Text) && int.TryParse(tbxIPServer_Port.Text,out x))
                         {
-                            Properties.Settings.Default.IPServer = tbxIPServer.Text;
+                            Properties.Settings.Default.AdressServer = tbxIPServer.Text;
+                            Properties.Settings.Default.PortServer = x;
                         }
                         else
                         {
                             settings = false;
-                            error += "\nIP адрес сервера должен соотвествовать маске: \"ххх.ххх.ххх.ххх\". Введите адрес сервера.";
-                        }
-                        
+                            error += "\nIP адрес сервера должен соотвествовать маске: \"ххх.ххх.ххх.ххх\", а порт должен состоять только из цифр. Введите адрес сервера и порт.";
+                        }                     
                     }
-
                 }
             }
             else
