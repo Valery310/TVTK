@@ -5,9 +5,6 @@
     <Setting Name="Time" Type="System.Collections.Generic.List&lt;TVTK.Time&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Temp" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="Height" Type="System.UInt32" Scope="User">
       <Value Profile="(Default)">1080</Value>
     </Setting>
@@ -23,11 +20,26 @@
     <Setting Name="NameClient" Type="System.String" Scope="User">
       <Value Profile="(Default)">TV1</Value>
     </Setting>
-    <Setting Name="PortServer" Type="System.Int32" Scope="User">
+    <Setting Name="PortServer" Type="System.UInt32" Scope="User">
       <Value Profile="(Default)">64647</Value>
     </Setting>
     <Setting Name="Stream" Type="System.String" Scope="User">
       <Value Profile="(Default)">Stream1</Value>
+    </Setting>
+    <Setting Name="LocalPathAdv" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="LocalPathNews" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DurationNews" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="PeriodNews" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="News" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

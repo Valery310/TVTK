@@ -14,7 +14,7 @@
 -->
     <Grid>
         <Button x:Name="Start" Content="Начать" HorizontalAlignment="Left" Margin="11,415,0,0" VerticalAlignment="Top" Width="85" Height="34" Click="ButtonStart_Click"/>
-        <ListView x:Name="lvFiles" HorizontalAlignment="Left" Height="399" Margin="295,10,0,0" VerticalAlignment="Top" Width="487">
+        <ListView x:Name="lvFiles" HorizontalAlignment="Left" Height="218" Margin="307,233,0,0" VerticalAlignment="Top" Width="475">
             <ListView.View>
                 <GridView>
                     <GridViewColumn/>
@@ -36,8 +36,8 @@
         <Button Content="Добавить" HorizontalAlignment="Left" Margin="215,252,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnAddTime_Click" Height="19"/>
         <Button Content="Удалить" HorizontalAlignment="Left" Margin="215,277,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnDelTime_Click" Height="20"/>
         <TextBlock HorizontalAlignment="Left" Margin="11,295,0,0" TextWrapping="Wrap" Text="Период работы" VerticalAlignment="Top" Height="16"/>
-        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="210" Margin="9,18,0,0" Stroke="Black" VerticalAlignment="Top" Width="281"/>
-        <Button x:Name="btnApplyResolution" Content="Применить" HorizontalAlignment="Left" Margin="194,201,0,0" VerticalAlignment="Top" Width="75" Click="btnApplySetting_Click"/>
+        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="210" Margin="9,18,0,0" Stroke="Black" VerticalAlignment="Top" Width="773"/>
+        <Button x:Name="btnApplyResolution" Content="Применить" HorizontalAlignment="Left" Margin="695,201,0,0" VerticalAlignment="Top" Width="75" Click="btnApplySetting_Click"/>
         <TextBlock x:Name="tblHeight" HorizontalAlignment="Left" Margin="10,55,0,0" TextWrapping="Wrap" Text="Высота" VerticalAlignment="Top"/>
         <TextBlock x:Name="tblWidth" HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" Text="Ширина" VerticalAlignment="Top"/>
         <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23" Margin="79,49,0,0" TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87"/>
@@ -53,5 +53,18 @@
         <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="222,165,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="49"/>
         <Label Content=":" HorizontalAlignment="Left" Margin="209,158,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
         <CheckBox Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" Height="23" Margin="245,49,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
+        <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="245,101,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
+        <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="246,24,0,0" VerticalAlignment="Top"/>
+        <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left" Margin="247,76,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" Margin="535,49,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click"/>
+        <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left" Margin="535,101,0,0" VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
+        <CheckBox x:Name="chbNews" Content="Показывать новости" HorizontalAlignment="Left" Margin="119,201,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" Margin="465,135,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
+        <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" Margin="465,162,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
+        <Label Content="Частота показа новостей" HorizontalAlignment="Left" Margin="280,132,0,0" VerticalAlignment="Top"/>
+        <Label Content="мин." HorizontalAlignment="Left" Margin="517,159,0,0" VerticalAlignment="Top"/>
+        <Label Content="мин." HorizontalAlignment="Left" Margin="517,132,0,0" VerticalAlignment="Top"/>
+        <Label Content="Длительность показа новостей" HorizontalAlignment="Left" Margin="280,159,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

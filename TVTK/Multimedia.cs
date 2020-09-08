@@ -8,9 +8,10 @@ namespace TVTK
 {
     public enum Type
     {
-        Video,
-        Document,
-        Photo
+        Adv,
+        News,
+        Photo,
+        Statistics
     }
 
     public class MultimediaFile

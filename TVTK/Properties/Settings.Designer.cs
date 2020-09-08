@@ -36,18 +36,6 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Temp {
-            get {
-                return ((string)(this["Temp"]));
-            }
-            set {
-                this["Temp"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1080")]
         public uint Height {
             get {
@@ -109,9 +97,9 @@ namespace TVTK.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("64647")]
-        public int PortServer {
+        public uint PortServer {
             get {
-                return ((int)(this["PortServer"]));
+                return ((uint)(this["PortServer"]));
             }
             set {
                 this["PortServer"] = value;
@@ -127,6 +115,66 @@ namespace TVTK.Properties {
             }
             set {
                 this["Stream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LocalPathAdv {
+            get {
+                return ((string)(this["LocalPathAdv"]));
+            }
+            set {
+                this["LocalPathAdv"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LocalPathNews {
+            get {
+                return ((string)(this["LocalPathNews"]));
+            }
+            set {
+                this["LocalPathNews"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public uint DurationNews {
+            get {
+                return ((uint)(this["DurationNews"]));
+            }
+            set {
+                this["DurationNews"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public uint PeriodNews {
+            get {
+                return ((uint)(this["PeriodNews"]));
+            }
+            set {
+                this["PeriodNews"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool News {
+            get {
+                return ((bool)(this["News"]));
+            }
+            set {
+                this["News"] = value;
             }
         }
     }

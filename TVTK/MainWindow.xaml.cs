@@ -41,13 +41,17 @@ namespace TVTK
     {
         MediaElement mediaElement; // Проигрыватель видео и рекламы
         List<Uri> playList; // плейлист рекламы
+        List<Uri> playListNews; // плейлист новостей.
         int queue; // текущее значение индекса плейлиста
-        DispatcherTimer timer;//Таймер для проверки текущего времени и запуска/остановки проигрывания видео/новостей.
-        bool playing = false; // маркре, позволяющий определить текущее состояние проигрывателя видео/рекламы
+        DispatcherTimer timer;//Таймер для проверки текущего времени и запуска/остановки проигрывания всего контента.
+        DispatcherTimer timerStartNews;//Таймер для запуска показа новостей.
+        DispatcherTimer timerEndNews;//Таймер для остановки показа новостей.
+        bool playing = false; // маркер, позволяющий определить текущее состояние проигрывателя видео/рекламы
+        bool showNews = false; //маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
         bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
         Window window;//окно проигрывателя рекламы/видео
-        bool showNews = false; //маркер, позволяющий понять текущее состояние показа новостей.
         TypeWork typeWork;
+        List<List<MultimediaFile>> settingFromServer;
 
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
@@ -63,11 +67,33 @@ namespace TVTK
             tbxWidth.Text = Properties.Settings.Default.Width.ToString();
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
             timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0,1,0); //Таймер проверяет время каждую минуту
+            timer.Interval = new TimeSpan(0,1,0); //Таймер проверяет время каждую минуту           
+            if (Properties.Settings.Default.PeriodNews>0)
+            {
+                timerStartNews = new DispatcherTimer();
+                timerStartNews.Interval = new TimeSpan(0, (int)Properties.Settings.Default.PeriodNews, 0);
+                if (Properties.Settings.Default.DurationNews > 0)
+                {
+                    timerEndNews = new DispatcherTimer();
+                    timerEndNews.Interval = new TimeSpan(0, (int)Properties.Settings.Default.DurationNews, 0);
+                }
+            }
+            chbNews.IsChecked = Properties.Settings.Default.News;
             tbxIPServer.Text = Properties.Settings.Default.AdressServer;
             tbxIPServer_Port.Text = Properties.Settings.Default.PortServer.ToString();
             tbxNameClient.Text = Properties.Settings.Default.NameClient;
-
+            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
+            {
+                Properties.Settings.Default.LocalPathAdv = Directory.GetCurrentDirectory();
+            }
+            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathNews))
+            {
+                Properties.Settings.Default.LocalPathNews = Directory.GetCurrentDirectory();
+            }
+            tbxPathAdv.Text = Properties.Settings.Default.LocalPathAdv;
+            tbxPathNews.Text = Properties.Settings.Default.LocalPathNews;
+            tbxPeriodNews.Text = Properties.Settings.Default.PeriodNews.ToString(); ;
+            tbxDurationNews.Text = Properties.Settings.Default.DurationNews.ToString();
             switch (typeWork)
             {
                 case (TypeWork)TypeWork.Local: 
@@ -155,22 +181,32 @@ namespace TVTK
         {
             queue = 1;
 
+            if (Properties.Settings.Default.News)
+            {
+                timerStartNews.Tick += new EventHandler(StartNews);
+                timer.Start();
+            }
+            
+
             switch (Properties.Settings.Default.TypeWork)
             {
                 case (uint)TypeWork.Local:
-                    CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-                    dialog.IsFolderPicker = true;
-                    //  dialog.InitialDirectory = currentDirectory;
-                    dialog.Multiselect = false;
-                    if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                    if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
                     {
-                        playList = GetVideosLocal(dialog.FileName);
+                        playList = GetContentLocal(Properties.Settings.Default.LocalPathAdv);
+                        playListNews = GetContentLocal(Properties.Settings.Default.LocalPathNews);
                         CreatePlayer();
                         //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                                 
                     }
+                    else
+                    {
+                        MessageBox.Show("Необходимо задать путь к контенту.");
+                    }
                     break;
                 case (uint)TypeWork.Network:
-                    playList = GetVideosLan(await GetPropertiesFromServer());
+                    settingFromServer = await GetPropertiesFromServer();
+                    playList = GetContentLan(settingFromServer[(int)Type.Adv]);
+                    playListNews = GetContentLan(settingFromServer[(int)Type.News]);
                     CreatePlayer();
                     break;
                 case (uint)TypeWork.Mixed:
@@ -187,13 +223,38 @@ namespace TVTK
                 }
 
                 // CompositionTarget.Rendering += CompositionTarget_Rendering;
-                timer.Tick += new EventHandler(NewsStart);
+               // timer.Tick += new EventHandler(NewsStart);
             }
             else
             {
                 MessageBox.Show("Плейлист пуст.");
             }
            
+        }
+
+        public void StartNews(object sender, EventArgs e) 
+        {
+            if (!showNews)
+            {
+                timerStartNews.Stop();
+                timerEndNews.Tick += new EventHandler(StopNews);
+                timerEndNews.Start();
+              //  CreateNewWindow(window.Content as Canvas);
+                showNews = true;                
+                AnimationNews();
+            }
+        }
+
+        public void StopNews(object sender, EventArgs e) 
+        {
+            if (showNews)
+            {
+                timerStartNews.Start();
+                timerEndNews.Tick -= new EventHandler(StopNews);
+                timerEndNews.Stop();
+                showNews = false;
+                AnimationNews();
+            }
         }
 
         public void CreatePlayer() 
@@ -219,7 +280,10 @@ namespace TVTK
             window.KeyDown += window_KeyDown;
             window.Cursor = Cursors.None;
             window.Show();
-            CreateNewWindow(canvas);
+            if (Properties.Settings.Default.News)
+            {
+                CreateNewWindow(canvas);
+            }
             window.Activate();
             window.Left = 0;
             window.Top = 0;
@@ -260,7 +324,7 @@ namespace TVTK
             }
         }
 
-        public List<Uri> GetVideosLocal(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
+        public List<Uri> GetContentLocal(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
         {
             var temp = new List<Uri>();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
@@ -277,15 +341,12 @@ namespace TVTK
             return temp;
         }
 
-        public List<Uri> GetVideosLan(List<List<MultimediaFile>> multimediaFiles) 
+        public List<Uri> GetContentLan(List<MultimediaFile> multimediaFiles)//List<List<MultimediaFile>> multimediaFiles) //нужно разделить на разные плейлисты.
         {
             var Temp = new List<Uri>();
-            foreach (var items in multimediaFiles)
+            foreach (var item in multimediaFiles)
             {
-                foreach (var item in items)
-                {
-                    Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (Type)item.type + "&id=" + item.id).Uri);
-                }
+                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (Type)item.type + "&id=" + item.id).Uri);              
             }
             
             return Temp;
@@ -293,7 +354,7 @@ namespace TVTK
 
         public async Task<List<List<MultimediaFile>>> GetPropertiesFromServer() 
         {
-            var addressServer = new UriBuilder("http", Properties.Settings.Default.AdressServer, Properties.Settings.Default.PortServer).Uri;
+            var addressServer = new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer).Uri;
             //     var Stream = Properties.Settings.Default.Stream;
 
             var localAdress = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
@@ -399,18 +460,36 @@ namespace TVTK
              contentControlNews.Background = new SolidColorBrush(Colors.Transparent);
             //  ImageBrush imageBrush = new ImageBrush(new BitmapImage(new Uri(@".\TKS.png", UriKind.Relative)));
             //   contentControlNews.Background = imageBrush;
-            MediaElement mediaElement = new MediaElement();
-            mediaElement.Source = new Uri(@".\TKS.png", UriKind.Relative);
-            mediaElement.Width = contentControlNews.Width;
-            mediaElement.Height = contentControlNews.Height;
-            contentControlNews.Children.Add(mediaElement);
+            MediaElement mediaElementNews = new MediaElement();
+            mediaElementNews.Source = new Uri(@".\TKS.png", UriKind.Relative);
+            mediaElementNews.Width = contentControlNews.Width;
+            mediaElementNews.Height = contentControlNews.Height;
+            mediaElementNews.MediaOpened += MediaElementNews_MediaOpened;
+            mediaElementNews.MediaEnded += MediaElementNews_MediaEnded; ;
+            mediaElementNews.KeyDown += MediaElementNews_KeyDown;              
+            contentControlNews.Children.Add(mediaElementNews);
             contentControlNews.Margin = new Thickness(canvas.Width, canvas.Height/2, -contentControlNews.Width, 0);
             canvas.Children.Add(contentControlNews);
             canvas.Children[1].Visibility = Visibility.Visible;
 
         }
 
-        public void NewsStart(object sender, EventArgs e)//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
+        private static void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void MediaElementNews_KeyDown(object sender, KeyEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
             Canvas canvas = window.Content as Canvas;
             StackPanel contentControlNews = canvas.Children[1] as StackPanel;
@@ -437,13 +516,13 @@ namespace TVTK
 
         private void btnApplySetting_Click(object sender, RoutedEventArgs e)
         {
-            int i, b;
+            uint i, b;
             bool settings = true;
             string error = "Проверьте следующие настройки:";
-            if (int.TryParse(tblHeight.Text, out i) && int.TryParse(tblWidth.Text,out b))
+            if (uint.TryParse(tbxHeight.Text, out i) && uint.TryParse(tbxWidth.Text,out b))
             {
-                Properties.Settings.Default.Height = (uint)i;
-                Properties.Settings.Default.Width = (uint)b;
+                Properties.Settings.Default.Height = i;
+                Properties.Settings.Default.Width = b;
                 typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
 
                 if (typeWork == TypeWork.Mixed || typeWork == TypeWork.Network)
@@ -461,13 +540,14 @@ namespace TVTK
                     if (string.IsNullOrWhiteSpace(tbxIPServer.Text) && string.IsNullOrWhiteSpace(tbxIPServer_Port.Text))
                     {
                         settings = false;
-                        error += "\nIP адрес сервера и порт не должен быть пустыми. Введите адрес сервера.";
+                        error += "\nАдрес сервера и порт не должен быть пустыми. Введите адрес сервера.";
                     }
                     else
                     {
-                        Regex regex = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
-                        int x;
-                        if (regex.IsMatch(tbxIPServer.Text) && int.TryParse(tbxIPServer_Port.Text,out x))
+                        //Regex regex = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
+                        //regex.IsMatch(tbxIPServer.Text) &&
+                        uint x;
+                        if (uint.TryParse(tbxIPServer_Port.Text,out x))
                         {
                             Properties.Settings.Default.AdressServer = tbxIPServer.Text;
                             Properties.Settings.Default.PortServer = x;
@@ -475,7 +555,7 @@ namespace TVTK
                         else
                         {
                             settings = false;
-                            error += "\nIP адрес сервера должен соотвествовать маске: \"ххх.ххх.ххх.ххх\", а порт должен состоять только из цифр. Введите адрес сервера и порт.";
+                            error += "\nПорт должен состоять только из цифр. Введите адрес сервера и порт.";
                         }                     
                     }
                 }
@@ -486,9 +566,21 @@ namespace TVTK
                 error += "Настройки размеров экрана не применены. Вводить можно только цифры.";
             }
 
+            uint p, d;
+            if (uint.TryParse(tbxDurationNews.Text, out d) && uint.TryParse(tbxPeriodNews.Text, out p))
+            {
+                Properties.Settings.Default.DurationNews = d;
+                Properties.Settings.Default.PeriodNews = p;
+            }
+            else
+            {
+                settings = false;
+                error += "\nВремя должно состоять из цифр.";
+            }
             if (settings)
             {
                 Properties.Settings.Default.Save();
+                MessageBox.Show("Настройки применены.");
             }
             else
             {
@@ -525,5 +617,34 @@ namespace TVTK
                     break;
             }
         }
+
+        private void btnSetPathNews_Click(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                tbxPathNews.Text = dialog.FileName;
+                Properties.Settings.Default.LocalPathNews = dialog.FileName;
+            }
+        }
+
+        private void btnSetPathAdv_Click(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                tbxPathAdv.Text = dialog.FileName;
+                Properties.Settings.Default.LocalPathAdv = dialog.FileName;
+
+            }
+        }
+
+
     }
 }
