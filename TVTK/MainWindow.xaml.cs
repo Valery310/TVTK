@@ -41,7 +41,8 @@ namespace TVTK
     /// 
     public partial class MainWindow : Window
     {
-        MediaElement mediaElement; // Проигрыватель видео и рекламы
+        MediaElement mediaElement; // Проигрыватель рекламы
+        MediaElement mediaElementNews;// Проигрыватель новостей
         List<Uri> playList; // плейлист рекламы
         List<Uri> playListNews; // плейлист новостей.
         int queue; // текущее значение индекса плейлиста
@@ -168,7 +169,7 @@ namespace TVTK
 
         public void CheckPlayer(object sender, EventArgs e) //Запуск плеера если наступило рабочее время.
         {
-            if (CheckTime() == true && playing == false && StartWithoutTime == false)
+            if (CheckTime() == true && playing == false && StartWithoutTime == false && !showNews)
             {
                 mediaElement.Play();
             }
@@ -201,6 +202,7 @@ namespace TVTK
             if (Properties.Settings.Default.News)
             {
                 timerStartNews.Tick += new EventHandler(StartNews);
+                timerStartNews.Start();
                 timer.Start();
             }
             
@@ -251,14 +253,18 @@ namespace TVTK
 
         public void StartNews(object sender, EventArgs e) 
         {
-            if (!showNews)
+            if (!showNews && CheckTime())
             {
                 timerStartNews.Stop();
                 timerEndNews.Tick += new EventHandler(StopNews);
                 timerEndNews.Start();
-              //  CreateNewWindow(window.Content as Canvas);
+                //  CreateNewWindow(window.Content as Canvas);
+                mediaElement.Pause();
+                mediaElementNews.Source = playListNews.FirstOrDefault();
+                mediaElementNews.Play();
                 showNews = true;                
                 AnimationNews();
+                mediaElementNews.Focus();
             }
         }
 
@@ -269,8 +275,11 @@ namespace TVTK
                 timerStartNews.Start();
                 timerEndNews.Tick -= new EventHandler(StopNews);
                 timerEndNews.Stop();
+                mediaElement.Play();
+                mediaElementNews.Pause();
                 showNews = false;
                 AnimationNews();
+                mediaElement.Focus();
             }
         }
 
@@ -300,7 +309,7 @@ namespace TVTK
             window.Show();
             if (Properties.Settings.Default.News)
             {
-                CreateNewWindow(canvas);
+                CreateNewsWindow(canvas);
             }
             window.Activate();
             window.Left = Properties.Settings.Default.PositionX;
@@ -409,44 +418,99 @@ namespace TVTK
         }
 
         private void window_KeyDown(object sender, KeyEventArgs e)//управление проигрыванием плеер и новостей
-        {
-            
-
-            switch (e.Key)
+        {           
+             switch (e.Key)
             {                           
-                case Key.Pause:                   
-                    mediaElement.Pause();
+                case Key.Pause:
+                    if (!showNews)
+                    {
+                        mediaElement.Pause();
+                    }
+                    else
+                    {
+                        mediaElementNews.Pause();
+                    }
                     break;           
                 case Key.Escape:
                     timer.Tick -= new EventHandler(CheckPlayer);
                     var temp = (sender as Window).Content as Canvas;
                     (temp.Children[0] as MediaElement)?.Close();
+                    mediaElementNews.Close();
                     (sender as Window).Close();
                     playList.Clear();
+                    playListNews.Clear();
+                    showNews = false;
                     playing = false;
                     break;              
                 case Key.Space:
-                    mediaElement.Pause();
+                    if (!showNews)
+                    {
+                        mediaElement.Pause();
+                    }
+                    else
+                    {
+                        mediaElementNews.Pause();
+                    }
                     break;
                 case Key.Enter:
-                    mediaElement.Play();
+                    if (!showNews)
+                    {
+                        mediaElement.Play();
+                    }
+                    else
+                    {
+                        mediaElementNews.Play();
+                    }                    
                     break;
                 case Key.Left:
-                    mediaElement.Position = mediaElement.Position - new TimeSpan(0,0,0,10);
+                    if (!showNews)
+                    {
+                        mediaElement.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 10);
+                    }
+                    else
+                    {
+                        mediaElementNews.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 10);
+                    }                    
                     break;
                 case Key.Up:
-                    mediaElement.Volume += 0.05D; 
+                    if (!showNews)
+                    {
+                        mediaElement.Volume += 0.05D;
+                    }
+                    else
+                    {
+                        mediaElementNews.Volume += 0.05D;
+                    }                   
                     break;
                 case Key.Right:
-                    var t = mediaElement.Position + new TimeSpan(0, 0, 0, 10);
-                    if (t >= mediaElement.NaturalDuration.TimeSpan)
+                    if (!showNews)
                     {
-                        t = mediaElement.NaturalDuration.TimeSpan;
+                        var t = mediaElement.Position + new TimeSpan(0, 0, 0, 10);
+                        if (t >= mediaElement.NaturalDuration.TimeSpan)
+                        {
+                            t = mediaElement.NaturalDuration.TimeSpan;
+                        }
+                        mediaElement.Position = t;
                     }
-                    mediaElement.Position = t;
+                    else
+                    {
+                        var t = mediaElementNews.Position + new TimeSpan(0, 0, 0, 10);
+                        if (t >= mediaElementNews.NaturalDuration.TimeSpan)
+                        {
+                            t = mediaElementNews.NaturalDuration.TimeSpan;
+                        }
+                        mediaElementNews.Position = t;
+                    }                    
                     break;
                 case Key.Down:
-                    mediaElement.Volume -= 0.05D;
+                    if (!showNews)
+                    {
+                        mediaElement.Volume -= 0.05D;
+                    }
+                    else
+                    {
+                        mediaElementNews.Volume -= 0.05D;
+                    }                
                     break;                       
             }
         }
@@ -467,7 +531,7 @@ namespace TVTK
             viewModelTime.Remove(t);
         }
 
-        static void CreateNewWindow(Canvas canvas)//Создание окна новостей
+        void CreateNewsWindow(Canvas canvas)//Создание окна новостей
         {
             StackPanel contentControlNews = new StackPanel();
 
@@ -478,8 +542,9 @@ namespace TVTK
              contentControlNews.Background = new SolidColorBrush(Colors.Transparent);
             //  ImageBrush imageBrush = new ImageBrush(new BitmapImage(new Uri(@".\TKS.png", UriKind.Relative)));
             //   contentControlNews.Background = imageBrush;
-            MediaElement mediaElementNews = new MediaElement();
-            mediaElementNews.Source = new Uri(@".\TKS.png", UriKind.Relative);
+            mediaElementNews = new MediaElement();
+            mediaElementNews.LoadedBehavior = MediaState.Manual;
+            mediaElementNews.UnloadedBehavior = MediaState.Manual;
             mediaElementNews.Width = contentControlNews.Width;
             mediaElementNews.Height = contentControlNews.Height;
             mediaElementNews.MediaOpened += MediaElementNews_MediaOpened;
@@ -489,23 +554,51 @@ namespace TVTK
             contentControlNews.Margin = new Thickness(canvas.Width/2, canvas.Height, -contentControlNews.Width, 0);
             canvas.Children.Add(contentControlNews);
             canvas.Children[1].Visibility = Visibility.Visible;
-
+            mediaElementNews.Visibility = Visibility.Visible;
+            contentControlNews.Visibility = Visibility.Visible;
+            contentControlNews.KeyDown += ContentControlNews_KeyDown;
+            canvas.KeyDown += Canvas_KeyDown;
+            //mediaElementNews.Clock.
+            //mediaElementNews.Focus();
+            
         }
 
-        private static void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
+        private void ContentControlNews_KeyDown(object sender, KeyEventArgs e)//Надо определить какой из элементов будет реагировать на нажатие клавиш.
         {
             throw new NotImplementedException();
         }
 
-        private static void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
+        private void Canvas_KeyDown(object sender, KeyEventArgs e)//Надо определить какой из элементов будет реагировать на нажатие клавиш.
         {
             throw new NotImplementedException();
         }
 
-        private static void MediaElementNews_KeyDown(object sender, KeyEventArgs e)
+        private void MediaElementNews_KeyDown(object sender, KeyEventArgs e)//Надо определить какой из элементов будет реагировать на нажатие клавиш.
         {
             throw new NotImplementedException();
         }
+
+        private void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            //вероятно, потребуется какя-то проверка времени при старте.
+        }
+
+        private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            if ((CheckTime() || StartWithoutTime) && showNews)
+            {
+                if (queue > playListNews.Count)
+                {
+                    queue = 1;
+                }
+                mediaElementNews.Source = playList[queue - 1];
+                mediaElementNews.Position = TimeSpan.FromSeconds(0);
+                mediaElementNews.Play();
+                queue++;
+            }
+        }
+
+    
 
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
@@ -513,21 +606,21 @@ namespace TVTK
             StackPanel contentControlNews = canvas.Children[1] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
 
-            if (showNews == false)
+            if (showNews == true)//если истина, то выводим экран новостей
             {
                 thicknessAnimation.From = contentControlNews.Margin;
-                thicknessAnimation.To = canvas.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
-                showNews = true;
+                thicknessAnimation.To = mediaElement.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
+              //  showNews = true;
             }
             else
             {
                 thicknessAnimation.From = contentControlNews.Margin;
-                thicknessAnimation.To = new Thickness(canvas.Width/2, canvas.Height, 0, 0);
-                showNews = false;
+                thicknessAnimation.To = new Thickness(mediaElement.Width/2, mediaElement.Height, 0, 0);
+              //  showNews = false;
             }
             
 
-            thicknessAnimation.Duration = TimeSpan.FromSeconds(5);
+            thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
          
         }
@@ -646,6 +739,7 @@ namespace TVTK
                     typeWork = TypeWork.Mixed;
                     break;
             }
+            Properties.Settings.Default.TypeWork = (uint)typeWork;
         }
 
         private void btnSetPathNews_Click(object sender, RoutedEventArgs e)
