@@ -38,33 +38,42 @@
         <TextBlock HorizontalAlignment="Left" Margin="11,295,0,0" TextWrapping="Wrap" Text="Период работы" VerticalAlignment="Top" Height="16"/>
         <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="210" Margin="9,18,0,0" Stroke="Black" VerticalAlignment="Top" Width="773"/>
         <Button x:Name="btnApplyResolution" Content="Применить" HorizontalAlignment="Left" Margin="695,201,0,0" VerticalAlignment="Top" Width="75" Click="btnApplySetting_Click"/>
-        <TextBlock x:Name="tblHeight" HorizontalAlignment="Left" Margin="10,55,0,0" TextWrapping="Wrap" Text="Высота" VerticalAlignment="Top"/>
-        <TextBlock x:Name="tblWidth" HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" Text="Ширина" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23" Margin="79,49,0,0" TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87"/>
-        <TextBox x:Name="tbxWidth" HorizontalAlignment="Left" Height="23" Margin="79,26,0,0" TextWrapping="Wrap" Text="1920" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87"/>
+        <TextBlock x:Name="tblHeight" HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Высота" VerticalAlignment="Top"/>
+        <TextBlock x:Name="tblWidth" HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" Text="Ширина" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23" Margin="79,56,0,0" TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87"/>
+        <TextBox x:Name="tbxWidth" HorizontalAlignment="Left" Height="23" Margin="79,28,0,0" TextWrapping="Wrap" Text="1920" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87"/>
         <Label Content="Настройки" HorizontalAlignment="Left" Margin="10,-5,0,0" VerticalAlignment="Top" Width="126" Height="27"/>
-        <RadioButton x:Name="rbMixed" Tag="2" GroupName="typeWork" Content="Смешанный режим работы" HorizontalAlignment="Left" Margin="13,116,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <RadioButton x:Name="rbLocal" Tag="0" GroupName="typeWork" Content="Локальный режим работы" HorizontalAlignment="Left" Margin="13,76,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <RadioButton x:Name="rbNetwork" Tag="1" GroupName="typeWork" Content="Сетевой режим работы" HorizontalAlignment="Left" Margin="13,96,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <Label Content="Адрес серера" HorizontalAlignment="Left" Margin="6,165,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" Width="93"/>
-        <TextBox x:Name="tbxIPServer" HorizontalAlignment="Left" Height="23" Margin="91,165,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Имя этого клиента" HorizontalAlignment="Left" Margin="6,135,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxNameClient" HorizontalAlignment="Left" Height="23" Margin="119,135,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="222,165,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="49"/>
-        <Label Content=":" HorizontalAlignment="Left" Margin="209,158,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
+        <RadioButton x:Name="rbMixed" Tag="2" GroupName="typeWork" Content="Смешанный режим работы" HorizontalAlignment="Left" Margin="13,123,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+        <RadioButton x:Name="rbLocal" Tag="0" GroupName="typeWork" Content="Локальный режим работы" HorizontalAlignment="Left" Margin="13,83,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+        <RadioButton x:Name="rbNetwork" Tag="1" GroupName="typeWork" Content="Сетевой режим работы" HorizontalAlignment="Left" Margin="13,103,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+        <Label Content="Адрес серера" HorizontalAlignment="Left" Margin="6,173,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" Width="93"/>
+        <TextBox x:Name="tbxIPServer" HorizontalAlignment="Left" Height="23" Margin="91,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="156"/>
+        <Label Content="Имя этого клиента" HorizontalAlignment="Left" Margin="6,142,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbxNameClient" HorizontalAlignment="Left" Height="23" Margin="119,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="152"/>
+        <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="258,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="58"/>
+        <Label Content=":" HorizontalAlignment="Left" Margin="247,166,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
         <CheckBox Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" Height="23" Margin="245,49,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
-        <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="245,101,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
-        <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="246,24,0,0" VerticalAlignment="Top"/>
-        <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left" Margin="247,76,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" Margin="535,49,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click"/>
-        <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left" Margin="535,101,0,0" VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
+        <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" Height="23" Margin="286,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
+        <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="286,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
+        <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="287,82,0,0" VerticalAlignment="Top"/>
+        <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left" Margin="288,122,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" Margin="576,105,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click"/>
+        <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left" Margin="576,144,0,0" VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
         <CheckBox x:Name="chbNews" Content="Показывать новости" HorizontalAlignment="Left" Margin="119,201,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" Margin="465,135,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
-        <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" Margin="465,162,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
-        <Label Content="Частота показа новостей" HorizontalAlignment="Left" Margin="280,132,0,0" VerticalAlignment="Top"/>
-        <Label Content="мин." HorizontalAlignment="Left" Margin="517,159,0,0" VerticalAlignment="Top"/>
-        <Label Content="мин." HorizontalAlignment="Left" Margin="517,132,0,0" VerticalAlignment="Top"/>
-        <Label Content="Длительность показа новостей" HorizontalAlignment="Left" Margin="280,159,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" Margin="506,170,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
+        <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" Margin="506,197,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51"/>
+        <Label Content="Частота показа новостей" HorizontalAlignment="Left" Margin="321,167,0,0" VerticalAlignment="Top"/>
+        <Label Content="мин." HorizontalAlignment="Left" Margin="558,194,0,0" VerticalAlignment="Top"/>
+        <Label Content="мин." HorizontalAlignment="Left" Margin="558,167,0,0" VerticalAlignment="Top"/>
+        <Label Content="Длительность показа новостей" HorizontalAlignment="Left" Margin="321,194,0,0" VerticalAlignment="Top"/>
+      <!--  <ComboBox Name="cmbbxAudioOutput" HorizontalAlignment="Left" Margin="615,49,0,0" VerticalAlignment="Top" Width="155" Height="130"/>
+        
+        <Label Content="Вывод аудио" HorizontalAlignment="Left" Margin="616,27,0,0" VerticalAlignment="Top"/>
+      -->  
+        <TextBox x:Name="tbxPositionX" HorizontalAlignment="Left" Height="23" Margin="346,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="tbxPositionY" HorizontalAlignment="Left" Height="23" Margin="347,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Расположение окна" HorizontalAlignment="Left" Margin="286,14,0,0" VerticalAlignment="Top"/>
+        <Label Content="По оси X" HorizontalAlignment="Left" Margin="286,37,0,0" VerticalAlignment="Top"/>
+        <Label Content="По оси Y" HorizontalAlignment="Left" Margin="286,63,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

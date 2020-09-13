@@ -30,6 +30,8 @@ using System.Web.Helpers;
 using Newtonsoft.Json;
 using System.Text.Encodings.Web;
 using System.Web;
+using System.Media;
+//using NAudio.CoreAudioApi;
 
 namespace TVTK
 {
@@ -78,6 +80,21 @@ namespace TVTK
                     timerEndNews.Interval = new TimeSpan(0, (int)Properties.Settings.Default.DurationNews, 0);
                 }
             }
+
+            tbxPositionX.Text = Properties.Settings.Default.PositionX.ToString();
+            tbxPositionY.Text = Properties.Settings.Default.PositionY.ToString();
+            //Попытка сделать выбор аудиовыхода    string audioSelector = MediaDevice.GetAudioRenderSelector();//выбор выхода аудио
+            //Попытка сделать выбор аудиовыхода    var outputDevices = await DeviceInformation.FindAllAsync(audioSelector);
+            //foreach (var device in outputDevices)
+            //{
+            //    var deviceItem = new ComboBoxItem();
+            //    deviceItem.Content = device.Name;
+            //    deviceItem.Tag = device;
+            //    cmbbxAudioOutput.Items.Add(deviceItem);
+            //}
+
+
+
             chbNews.IsChecked = Properties.Settings.Default.News;
             tbxIPServer.Text = Properties.Settings.Default.AdressServer;
             tbxIPServer_Port.Text = Properties.Settings.Default.PortServer.ToString();
@@ -266,6 +283,7 @@ namespace TVTK
             mediaElement.KeyDown += MediaElement_KeyDown;
             mediaElement.MediaOpened += MediaElement_MediaOpened;
             mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
+         //Попытка сделать выбор аудиовыхода   mediaElement.Audi
 
             window = null;
             window = new Window();
@@ -285,8 +303,8 @@ namespace TVTK
                 CreateNewWindow(canvas);
             }
             window.Activate();
-            window.Left = 0;
-            window.Top = 0;
+            window.Left = Properties.Settings.Default.PositionX;
+            window.Top = Properties.Settings.Default.PositionY;
             window.WindowStyle = WindowStyle.None;
             window.ResizeMode = ResizeMode.NoResize;
             window.Background = new SolidColorBrush(Colors.Black);
@@ -453,8 +471,8 @@ namespace TVTK
         {
             StackPanel contentControlNews = new StackPanel();
 
-            contentControlNews.Width = canvas.Width / 2;
-            contentControlNews.Height = canvas.Height / 2;
+            contentControlNews.Width = canvas.Width;
+            contentControlNews.Height = canvas.Height;
 
             //contentControlNews.Background = new SolidColorBrush(Colors.White);
              contentControlNews.Background = new SolidColorBrush(Colors.Transparent);
@@ -468,7 +486,7 @@ namespace TVTK
             mediaElementNews.MediaEnded += MediaElementNews_MediaEnded; ;
             mediaElementNews.KeyDown += MediaElementNews_KeyDown;              
             contentControlNews.Children.Add(mediaElementNews);
-            contentControlNews.Margin = new Thickness(canvas.Width, canvas.Height/2, -contentControlNews.Width, 0);
+            contentControlNews.Margin = new Thickness(canvas.Width/2, canvas.Height, -contentControlNews.Width, 0);
             canvas.Children.Add(contentControlNews);
             canvas.Children[1].Visibility = Visibility.Visible;
 
@@ -498,13 +516,13 @@ namespace TVTK
             if (showNews == false)
             {
                 thicknessAnimation.From = contentControlNews.Margin;
-                thicknessAnimation.To = new Thickness(canvas.Width / 2, canvas.Height / 2, 0, 0);
+                thicknessAnimation.To = canvas.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
                 showNews = true;
             }
             else
             {
                 thicknessAnimation.From = contentControlNews.Margin;
-                thicknessAnimation.To = new Thickness(canvas.Width, canvas.Height / 2, 0, 0);
+                thicknessAnimation.To = new Thickness(canvas.Width/2, canvas.Height, 0, 0);
                 showNews = false;
             }
             
@@ -546,11 +564,11 @@ namespace TVTK
                     {
                         //Regex regex = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
                         //regex.IsMatch(tbxIPServer.Text) &&
-                        uint x;
-                        if (uint.TryParse(tbxIPServer_Port.Text,out x))
+                        uint port;
+                        if (uint.TryParse(tbxIPServer_Port.Text,out port))
                         {
                             Properties.Settings.Default.AdressServer = tbxIPServer.Text;
-                            Properties.Settings.Default.PortServer = x;
+                            Properties.Settings.Default.PortServer = port;
                         }
                         else
                         {
@@ -565,8 +583,19 @@ namespace TVTK
                 settings = false;
                 error += "Настройки размеров экрана не применены. Вводить можно только цифры.";
             }
+            int x, y;//проверка настроек изначального положения окна трансляции.
+            if (int.TryParse(tbxPositionX.Text, out x) && int.TryParse(tbxPositionY.Text, out y))
+            {
+                Properties.Settings.Default.PositionX = x;
+                Properties.Settings.Default.PositionY = y;
+            }
+            else
+            {
+                settings = false;
+                error += "\nКординаты должны состоять из цифр.";
+            }
 
-            uint p, d;
+            uint p, d;//проверка продолжительности рекламы и чсастоты ее вызова
             if (uint.TryParse(tbxDurationNews.Text, out d) && uint.TryParse(tbxPeriodNews.Text, out p))
             {
                 Properties.Settings.Default.DurationNews = d;
@@ -577,7 +606,8 @@ namespace TVTK
                 settings = false;
                 error += "\nВремя должно состоять из цифр.";
             }
-            if (settings)
+
+            if (settings) //итоговая проверка. Сохранение или вывод всех ошибок.
             {
                 Properties.Settings.Default.Save();
                 MessageBox.Show("Настройки применены.");
@@ -645,6 +675,6 @@ namespace TVTK
             }
         }
 
-
+    
     }
 }

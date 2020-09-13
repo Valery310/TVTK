@@ -177,5 +177,29 @@ namespace TVTK.Properties {
                 this["News"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int PositionX {
+            get {
+                return ((int)(this["PositionX"]));
+            }
+            set {
+                this["PositionX"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int PositionY {
+            get {
+                return ((int)(this["PositionY"]));
+            }
+            set {
+                this["PositionY"] = value;
+            }
+        }
     }
 }
