@@ -201,5 +201,29 @@ namespace TVTK.Properties {
                 this["PositionY"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Autoplay {
+            get {
+                return ((bool)(this["Autoplay"]));
+            }
+            set {
+                this["Autoplay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public int DurationShowNews {
+            get {
+                return ((int)(this["DurationShowNews"]));
+            }
+            set {
+                this["DurationShowNews"] = value;
+            }
+        }
     }
 }

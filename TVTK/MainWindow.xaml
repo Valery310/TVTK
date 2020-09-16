@@ -52,7 +52,7 @@
         <TextBox x:Name="tbxNameClient" HorizontalAlignment="Left" Height="23" Margin="119,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="152"/>
         <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="258,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="58"/>
         <Label Content=":" HorizontalAlignment="Left" Margin="247,166,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
-        <CheckBox Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="chkbxAutoplay" Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" Height="23" Margin="286,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
         <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="286,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="290"/>
         <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="287,82,0,0" VerticalAlignment="Top"/>

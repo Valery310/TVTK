@@ -45,10 +45,12 @@ namespace TVTK
         MediaElement mediaElementNews;// Проигрыватель новостей
         List<Uri> playList; // плейлист рекламы
         List<Uri> playListNews; // плейлист новостей.
-        int queue; // текущее значение индекса плейлиста
+        int queue; // текущее значение индекса плейлиста рекламных роликов
+        int queueNews;// текущее значение индекса плейлиста новостей
         DispatcherTimer timer;//Таймер для проверки текущего времени и запуска/остановки проигрывания всего контента.
         DispatcherTimer timerStartNews;//Таймер для запуска показа новостей.
         DispatcherTimer timerEndNews;//Таймер для остановки показа новостей.
+        DispatcherTimer timerDurationShowNews;//таймер времени показа одной новости.
         bool playing = false; // маркер, позволяющий определить текущее состояние проигрывателя видео/рекламы
         bool showNews = false; //маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
         bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
@@ -82,6 +84,9 @@ namespace TVTK
                 }
             }
 
+            timerDurationShowNews = new DispatcherTimer();
+            timerDurationShowNews.Interval = new TimeSpan(0, 0, Properties.Settings.Default.DurationShowNews);
+            timerDurationShowNews.Tick += Timer_Tick;
             tbxPositionX.Text = Properties.Settings.Default.PositionX.ToString();
             tbxPositionY.Text = Properties.Settings.Default.PositionY.ToString();
             //Попытка сделать выбор аудиовыхода    string audioSelector = MediaDevice.GetAudioRenderSelector();//выбор выхода аудио
@@ -112,6 +117,7 @@ namespace TVTK
             tbxPathNews.Text = Properties.Settings.Default.LocalPathNews;
             tbxPeriodNews.Text = Properties.Settings.Default.PeriodNews.ToString(); ;
             tbxDurationNews.Text = Properties.Settings.Default.DurationNews.ToString();
+            chkbxAutoplay.IsChecked = Properties.Settings.Default.Autoplay;
             switch (typeWork)
             {
                 case (TypeWork)TypeWork.Local: 
@@ -141,7 +147,14 @@ namespace TVTK
                 viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
             }
 
-            dgTime.ItemsSource = viewModelTime;            
+            dgTime.ItemsSource = viewModelTime;
+
+            if (Properties.Settings.Default.Autoplay == true)
+            {
+                ButtonStart_Click(new object(), new RoutedEventArgs());
+                this.WindowState = WindowState.Minimized;
+                window.Activate();
+            }
         }
 
         private void ViewModelTime_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -162,9 +175,10 @@ namespace TVTK
         private void ButtonStart_Click(object sender, RoutedEventArgs e)//Запуск проигрывателя с проверкой времени работы
         {
             StartWithoutTime = false;
-            timer.Tick += new EventHandler(CheckPlayer);
+            timer.Tick += new EventHandler(CheckPlayer);           
             StartPlayer();
             timer.Start();
+            CheckPlayer(new object(), new EventArgs());
         }
 
         public void CheckPlayer(object sender, EventArgs e) //Запуск плеера если наступило рабочее время.
@@ -198,6 +212,7 @@ namespace TVTK
         public async void StartPlayer() //Создание окна проигрывателя и его запуск.
         {
             queue = 1;
+            queueNews = 1;
 
             if (Properties.Settings.Default.News)
             {
@@ -262,6 +277,7 @@ namespace TVTK
                 mediaElement.Pause();
                 mediaElementNews.Source = playListNews.FirstOrDefault();
                 mediaElementNews.Play();
+                queueNews++;
                 showNews = true;                
                 AnimationNews();
                 mediaElementNews.Focus();
@@ -332,10 +348,11 @@ namespace TVTK
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             playing = true;
+            
         }//Выполняется при открытии файла плеером.
 
         void mediaElement_MediaEnded(object sender, RoutedEventArgs e)//Выполняется при окончаниипроигрывания ролика
-        {           
+        {
             mediaElement.Close();
             playing = false;
             if (CheckTime() || StartWithoutTime)
@@ -359,7 +376,7 @@ namespace TVTK
             {
                 if (item.Extension.ToLower() == ".mkv" || item.Extension.ToLower() == ".mp4" || item.Extension.ToLower() == ".avi"  || item.Extension.ToLower() == ".jpg" || item.Extension.ToLower() == ".mov")
                 {
-                    temp.Add(new UriBuilder(item.FullName).Uri);
+                    temp.Add(new Uri(item.FullName, UriKind.Absolute));
                 }            
             }
             lvFiles.ItemsSource = null;
@@ -549,7 +566,9 @@ namespace TVTK
             mediaElementNews.Height = contentControlNews.Height;
             mediaElementNews.MediaOpened += MediaElementNews_MediaOpened;
             mediaElementNews.MediaEnded += MediaElementNews_MediaEnded; ;
-            mediaElementNews.KeyDown += MediaElementNews_KeyDown;              
+            mediaElementNews.KeyDown += MediaElementNews_KeyDown;
+            mediaElementNews.Stretch = Stretch.UniformToFill;
+          //  mediaElementNews.SpeedRatio = 0.80;
             contentControlNews.Children.Add(mediaElementNews);
             contentControlNews.Margin = new Thickness(canvas.Width/2, canvas.Height, -contentControlNews.Width, 0);
             canvas.Children.Add(contentControlNews);
@@ -585,20 +604,27 @@ namespace TVTK
 
         private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
         {
-            if ((CheckTime() || StartWithoutTime) && showNews)
-            {
-                if (queue > playListNews.Count)
-                {
-                    queue = 1;
-                }
-                mediaElementNews.Source = playList[queue - 1];
-                mediaElementNews.Position = TimeSpan.FromSeconds(0);
-                mediaElementNews.Play();
-                queue++;
-            }
+            mediaElementNews.Pause();       
+            timerDurationShowNews.Start();
         }
 
-    
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            mediaElementNews.Close();
+            if ((CheckTime() || StartWithoutTime) && showNews)
+            {
+                if (queueNews > playListNews.Count)
+                {
+                    queueNews = 1;
+                }
+
+                mediaElementNews.Source = playListNews[queueNews - 1];
+                mediaElementNews.Position = TimeSpan.FromSeconds(0);
+                mediaElementNews.Play();
+                queueNews++;
+            }
+            (sender as DispatcherTimer).Stop();
+        }
 
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
@@ -702,6 +728,7 @@ namespace TVTK
 
             if (settings) //итоговая проверка. Сохранение или вывод всех ошибок.
             {
+                Properties.Settings.Default.Autoplay = chkbxAutoplay.IsEnabled;
                 Properties.Settings.Default.Save();
                 MessageBox.Show("Настройки применены.");
             }
@@ -746,7 +773,14 @@ namespace TVTK
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
-            dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathNews))
+            {
+                dialog.InitialDirectory = Properties.Settings.Default.LocalPathNews;
+            }
+            else
+            {
+                dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            }
             dialog.Multiselect = false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
@@ -759,7 +793,14 @@ namespace TVTK
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
-            dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
+            {
+                dialog.InitialDirectory = Properties.Settings.Default.LocalPathAdv;
+            }
+            else
+            {
+                dialog.InitialDirectory = Directory.GetCurrentDirectory();
+            }      
             dialog.Multiselect = false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
