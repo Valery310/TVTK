@@ -5,6 +5,9 @@
     <Setting Name="Time" Type="System.Collections.Generic.List&lt;TVTK.Time&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="TVs" Type="System.Collections.Generic.List&lt;TVTK.TV&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="Height" Type="System.UInt32" Scope="User">
       <Value Profile="(Default)">1080</Value>
     </Setting>
@@ -52,6 +55,9 @@
     </Setting>
     <Setting Name="DurationShowNews" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">15</Value>
+    </Setting>
+    <Setting Name="TitlePlayer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Player</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -57,13 +57,20 @@ namespace TVTK
         Window window;//окно проигрывателя рекламы/видео
         TypeWork typeWork;
         List<List<MultimediaFile>> settingFromServer;
-
+   
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
         {
             get;
             set;
         }
+
+        public ObservableCollection<TV> viewModelTV //Коллекция телевизоров
+        {
+            get;
+            set;
+        }
+
 
         public MainWindow()
         {
@@ -89,15 +96,7 @@ namespace TVTK
             timerDurationShowNews.Tick += Timer_Tick;
             tbxPositionX.Text = Properties.Settings.Default.PositionX.ToString();
             tbxPositionY.Text = Properties.Settings.Default.PositionY.ToString();
-            //Попытка сделать выбор аудиовыхода    string audioSelector = MediaDevice.GetAudioRenderSelector();//выбор выхода аудио
-            //Попытка сделать выбор аудиовыхода    var outputDevices = await DeviceInformation.FindAllAsync(audioSelector);
-            //foreach (var device in outputDevices)
-            //{
-            //    var deviceItem = new ComboBoxItem();
-            //    deviceItem.Content = device.Name;
-            //    deviceItem.Tag = device;
-            //    cmbbxAudioOutput.Items.Add(deviceItem);
-            //}
+        
 
 
 
@@ -118,6 +117,7 @@ namespace TVTK
             tbxPeriodNews.Text = Properties.Settings.Default.PeriodNews.ToString(); ;
             tbxDurationNews.Text = Properties.Settings.Default.DurationNews.ToString();
             chkbxAutoplay.IsChecked = Properties.Settings.Default.Autoplay;
+            tbxTitlePlayer.Text = Properties.Settings.Default.TitlePlayer;
             switch (typeWork)
             {
                 case (TypeWork)TypeWork.Local: 
@@ -136,6 +136,18 @@ namespace TVTK
                 Properties.Settings.Default.Time = new List<Time>();
             }
 
+            if (Properties.Settings.Default.TVs == null) //первичная инициализация параметра времени работы. Если он пустой, то надо создать.
+            {
+                Properties.Settings.Default.TVs = new List<TV>();
+            }
+
+            viewModelTV = new ObservableCollection<TV>(Properties.Settings.Default.TVs);
+            foreach (var item in viewModelTV)
+            {
+                item.Status = "-";
+            }
+            viewModelTV.CollectionChanged += ViewModelTV_CollectionChanged;
+
             viewModelTime = new ObservableCollection<Time>(Properties.Settings.Default.Time);
 
             viewModelTime.CollectionChanged += ViewModelTime_CollectionChanged;
@@ -147,14 +159,23 @@ namespace TVTK
                 viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
             }
 
+            AudioOutput.GetAudio();
+
             dgTime.ItemsSource = viewModelTime;
+            dgTV.ItemsSource = viewModelTV;
 
             if (Properties.Settings.Default.Autoplay == true)
             {
                 ButtonStart_Click(new object(), new RoutedEventArgs());
                 this.WindowState = WindowState.Minimized;
-                window.Activate();
+               //window.Activate();
             }
+        }
+
+        private void ViewModelTV_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Properties.Settings.Default.TVs = viewModelTV.ToList<TV>();
+            Properties.Settings.Default.Save();
         }
 
         private void ViewModelTime_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -174,11 +195,12 @@ namespace TVTK
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)//Запуск проигрывателя с проверкой времени работы
         {
+            //TV.WOL(viewModelTV.ToList<TV>());
             StartWithoutTime = false;
             timer.Tick += new EventHandler(CheckPlayer);           
             StartPlayer();
             timer.Start();
-            CheckPlayer(new object(), new EventArgs());
+           // CheckPlayer(new object(), new EventArgs());
         }
 
         public void CheckPlayer(object sender, EventArgs e) //Запуск плеера если наступило рабочее время.
@@ -227,8 +249,8 @@ namespace TVTK
                 case (uint)TypeWork.Local:
                     if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
                     {
-                        playList = GetContentLocal(Properties.Settings.Default.LocalPathAdv);
-                        playListNews = GetContentLocal(Properties.Settings.Default.LocalPathNews);
+                        playList = GetContentLocal(Properties.Settings.Default.LocalPathAdv, lvFiles);
+                        playListNews = GetContentLocal(Properties.Settings.Default.LocalPathNews, lvNews);
                         CreatePlayer();
                         //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                                 
                     }
@@ -238,10 +260,18 @@ namespace TVTK
                     }
                     break;
                 case (uint)TypeWork.Network:
-                    settingFromServer = await GetPropertiesFromServer();
-                    playList = GetContentLan(settingFromServer[(int)Type.Adv]);
-                    playListNews = GetContentLan(settingFromServer[(int)Type.News]);
-                    CreatePlayer();
+                    try
+                    {
+                        settingFromServer = await GetPropertiesFromServer();
+                        playList = GetContentLan(settingFromServer[(int)Type.Adv]);
+                        playListNews = GetContentLan(settingFromServer[(int)Type.News]);
+                        CreatePlayer();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                    
                     break;
                 case (uint)TypeWork.Mixed:
                     break;
@@ -312,6 +342,7 @@ namespace TVTK
 
             window = null;
             window = new Window();
+            window.Title = Properties.Settings.Default.TitlePlayer;
             window.Width = Properties.Settings.Default.Width; // System.Windows.SystemParameters.FullPrimaryScreenWidth;
             window.Height = Properties.Settings.Default.Height; // System.Windows.SystemParameters.FullPrimaryScreenHeight;
             Canvas canvas = new Canvas();
@@ -368,7 +399,7 @@ namespace TVTK
             }
         }
 
-        public List<Uri> GetContentLocal(string path) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
+        public List<Uri> GetContentLocal(string path, ListView lvPlaylist) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
         {
             var temp = new List<Uri>();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
@@ -379,9 +410,9 @@ namespace TVTK
                     temp.Add(new Uri(item.FullName, UriKind.Absolute));
                 }            
             }
-            lvFiles.ItemsSource = null;
-            lvFiles.Items.Clear();
-            lvFiles.ItemsSource = temp;
+            lvPlaylist.ItemsSource = null;
+            lvPlaylist.Items.Clear();
+            lvPlaylist.ItemsSource = temp;
             return temp;
         }
 
@@ -631,6 +662,7 @@ namespace TVTK
             Canvas canvas = window.Content as Canvas;
             StackPanel contentControlNews = canvas.Children[1] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
+            thicknessAnimation.DecelerationRatio = 0.5;
 
             if (showNews == true)//если истина, то выводим экран новостей
             {
@@ -726,9 +758,19 @@ namespace TVTK
                 error += "\nВремя должно состоять из цифр.";
             }
 
+            if (!string.IsNullOrWhiteSpace(tbxTitlePlayer.Text))
+            {
+                Properties.Settings.Default.TitlePlayer = tbxTitlePlayer.Text;
+            }
+            else
+            {
+                settings = false;
+                error += "\nИмя плеера должно быть указано!.";
+            }
+
             if (settings) //итоговая проверка. Сохранение или вывод всех ошибок.
             {
-                Properties.Settings.Default.Autoplay = chkbxAutoplay.IsEnabled;
+                Properties.Settings.Default.Autoplay = (bool)(chkbxAutoplay.IsChecked);
                 Properties.Settings.Default.Save();
                 MessageBox.Show("Настройки применены.");
             }
@@ -736,6 +778,8 @@ namespace TVTK
             {
                 MessageBox.Show(error);
             }
+
+            
         }
 
         public enum TypeWork
@@ -810,6 +854,76 @@ namespace TVTK
             }
         }
 
-    
+        private void btnWOLTV_Click(object sender, RoutedEventArgs e)
+        {
+            TV.WOL(viewModelTV);
+        }
+
+        private void btnAddTV_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var tv = new TV(tbxNameTV.Text, tbxIPTV.Text, tbxMACTV.Text, tbxDescTV.Text);
+                viewModelTV.Add(tv);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Введите данные правильно!\n" + ex); ;
+            }
+        }
+
+        private void btnDelTV_Click(object sender, RoutedEventArgs e)
+        {
+            TV tv = dgTV.SelectedItem as TV;
+            viewModelTV.Remove(tv);
+        }
+
+        private void tbxIPTV_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void tbxMACTV_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void tbxBreakBefore_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void tbxBreakFrom_TextChanged(object sender, TextChangedEventArgs e)
+        {
+         //   (sender as TextBox).Text = (sender as TextBox).Text.ToString("##:##");
+           // (sender as TextBox).Text = Regex.Replace((sender as TextBox).Text, @"^(([0,1][0-9])|(2[0-3])):[0-5][0-9]", "");
+        }
+
+        private void tbxIPServer_TextChanged(object sender, TextChangedEventArgs e)
+        {
+          //  (sender as TextBox).Text = Regex.Replace((sender as TextBox).Text, @"((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)", "");
+            //  e.Changes.
+            //  (88005553535).ToString("+#-###-###-##-##") => +8 - 800 - 555 - 35 - 35
+        }
+
+        private void tbxWidth_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !(Char.IsDigit(e.Text, 0));
+        }
+
+        private void tbxMACTV_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !((Char.IsLetterOrDigit(e.Text, 0) || e.Text.ToCharArray()[0] == ':') && e.Text == " " && e.Text.Length<=95);
+        }
+
+        private void tbxIPTV_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !((Char.IsDigit(e.Text, 0) || e.Text.ToCharArray()[0] == '.') && e.Text.ToCharArray()[0] != ' ' && e.Text.ToCharArray().Length <= 15);
+        }
+
+        private void btnCheckStatus_Click(object sender, RoutedEventArgs e)
+        {
+            TV.CheckStatus(viewModelTV);
+        }
     }
 }
