@@ -132,12 +132,13 @@ namespace TVTK
 
         public async static void CheckStatus(ObservableCollection<TV> AllTV) 
         {
-            string result = "-";
-            int b = 0;
-            foreach (var item in AllTV)
+            await Task.Run(() =>
             {
-                await Task.Run(() =>
+                string result = "-";
+                int b = 0;
+                foreach (var item in AllTV)
                 {
+
                     Ping ping = new Ping();
                     for (int i = 0; i < 5; i++)
                     {
@@ -151,10 +152,12 @@ namespace TVTK
                             result = "No";
                         }
                     }
-                });
-                item.Status = result;
-                b++;
-            } 
+
+                    item.Status = result;
+                    b++;
+                }
+            });
+        
         }
     }
 }

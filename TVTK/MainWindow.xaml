@@ -82,7 +82,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <DataGrid x:Name="dgTV" HorizontalAlignment="Left" Height="110" Margin="321,315,0,0" VerticalAlignment="Top" Width="461" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Single" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False">
+        <DataGrid x:Name="dgTV" HorizontalAlignment="Left" Height="110" Margin="321,315,0,0" VerticalAlignment="Top" Width="461" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Extended" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Name}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="55" Header="Имя"/>
                 <DataGridTextColumn Binding="{Binding Description}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="145" Header="Описание"/>
@@ -108,5 +108,6 @@
         <TextBox x:Name="tbxTitlePlayer" HorizontalAlignment="Left" Height="23" Margin="577,39,0,0" TextWrapping="Wrap" Text="Player" VerticalAlignment="Top" Width="120"/>
         <Label Content="Имя плеера" HorizontalAlignment="Left" Margin="494,36,0,0" VerticalAlignment="Top"/>
         <Button x:Name="btnCheckStatus" Content="Проверить доступность" HorizontalAlignment="Left" Margin="532,430,0,0" VerticalAlignment="Top" Width="140" Height="29" Click="btnCheckStatus_Click"/>
+        <Button x:Name="btnSelectedWOLTV" Content="Разбудить выбранные" HorizontalAlignment="Left" Margin="385,430,0,0" VerticalAlignment="Top" Width="134" Height="29" Click="Button_Click"/>
     </Grid>
 </Window>

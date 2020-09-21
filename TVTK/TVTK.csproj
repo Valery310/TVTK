@@ -339,6 +339,7 @@
     <Compile Include="AudioOutput.cs" />
     <Compile Include="Multimedia.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayList.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="TV.cs" />

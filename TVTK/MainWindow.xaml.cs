@@ -195,18 +195,18 @@ namespace TVTK
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)//Запуск проигрывателя с проверкой времени работы
         {
-            //TV.WOL(viewModelTV.ToList<TV>());
             StartWithoutTime = false;
-            timer.Tick += new EventHandler(CheckPlayer);           
+            timer.Tick += new EventHandler(CheckPlayer);
             StartPlayer();
             timer.Start();
-           // CheckPlayer(new object(), new EventArgs());
+            CheckPlayer(new object(), new EventArgs());
         }
 
         public void CheckPlayer(object sender, EventArgs e) //Запуск плеера если наступило рабочее время.
         {
             if (CheckTime() == true && playing == false && StartWithoutTime == false && !showNews)
             {
+                TV.WOL(viewModelTV);
                 mediaElement.Play();
             }
         }
@@ -262,10 +262,11 @@ namespace TVTK
                 case (uint)TypeWork.Network:
                     try
                     {
-                        settingFromServer = await GetPropertiesFromServer();
-                        playList = GetContentLan(settingFromServer[(int)Type.Adv]);
-                        playListNews = GetContentLan(settingFromServer[(int)Type.News]);
-                        CreatePlayer();
+                        // нужно переделать серверную часть для передачи плейлиста и обрабатывать его уже на клиенте.
+                        //settingFromServer = await GetPropertiesFromServer(); 
+                        //playList = GetContentLan(settingFromServer[(int)TypeContent.Adv]);
+                        //playListNews = GetContentLan(settingFromServer[(int)TypeContent.News]);
+                        //CreatePlayer();
                     }
                     catch (Exception ex)
                     {
@@ -285,15 +286,11 @@ namespace TVTK
                 {
                     mediaElement.Play();
                 }
-
-                // CompositionTarget.Rendering += CompositionTarget_Rendering;
-               // timer.Tick += new EventHandler(NewsStart);
             }
             else
             {
                 MessageBox.Show("Плейлист пуст.");
             }
-           
         }
 
         public void StartNews(object sender, EventArgs e) 
@@ -350,14 +347,20 @@ namespace TVTK
             canvas.Height = window.Height;
             window.Content = canvas;
             canvas.Children.Add(mediaElement);
-            //  window.Content = mediaElement;
             window.KeyDown += window_KeyDown;
-            window.Cursor = Cursors.None;
-            window.Show();
+            window.Cursor = Cursors.None;      
             if (Properties.Settings.Default.News)
             {
                 CreateNewsWindow(canvas);
             }
+            //var scaleX = VisualTreeHelper.GetDpi(this).DpiScaleX;
+            //var scaleY = VisualTreeHelper.GetDpi(this).DpiScaleY;
+            // ((UIElement)Content)
+            //window.RenderTransform = new ScaleTransform(1 / scaleX, 1 / scaleY);
+            //((UIElement)window.Content).RenderTransform = new ScaleTransform(1 / scaleX, 1 / scaleY);
+            //  ((UIElement)window.Content).RenderTransform = new ScaleTransform(1, 1);
+            ((UIElement)window.Content).RenderTransform = new ScaleTransform(0.989, 0.989);
+            window.Show();
             window.Activate();
             window.Left = Properties.Settings.Default.PositionX;
             window.Top = Properties.Settings.Default.PositionY;
@@ -392,10 +395,19 @@ namespace TVTK
                 {
                     queue = 1;
                 }
-                mediaElement.Source = playList[queue - 1];
+                try
+                {
+                    mediaElement.Source = playList[queue - 1];
+                }
+                catch (Exception)
+                {
+                    mediaElement.Source = playList[0];
+                }
                 mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElement.Play();
-                queue++;
+                Random r = new Random();
+                queue = r.Next(0, playList.Count - 1);
+                // queue++;
             }
         }
 
@@ -416,12 +428,12 @@ namespace TVTK
             return temp;
         }
 
-        public List<Uri> GetContentLan(List<MultimediaFile> multimediaFiles)//List<List<MultimediaFile>> multimediaFiles) //нужно разделить на разные плейлисты.
+        public List<Uri> GetContentLan(List<PlayList> playLists)//List<List<MultimediaFile>> multimediaFiles) //нужно разделить на разные плейлисты.
         {
             var Temp = new List<Uri>();
-            foreach (var item in multimediaFiles)
+            foreach (var item in playLists)
             {
-                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (Type)item.type + "&id=" + item.id).Uri);              
+                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (TypeContent)item.TypeContent).Uri);              
             }
             
             return Temp;
@@ -635,7 +647,7 @@ namespace TVTK
 
         private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
         {
-            mediaElementNews.Pause();       
+            mediaElementNews.Pause();
             timerDurationShowNews.Start();
         }
 
@@ -648,11 +660,20 @@ namespace TVTK
                 {
                     queueNews = 1;
                 }
-
-                mediaElementNews.Source = playListNews[queueNews - 1];
+                try
+                {
+                    mediaElementNews.Source = playListNews[queueNews - 1];
+                }
+                catch (Exception)
+                {
+                    mediaElementNews.Source = playListNews[0];
+                }
+                
                 mediaElementNews.Position = TimeSpan.FromSeconds(0);
                 mediaElementNews.Play();
-                queueNews++;
+                Random r = new Random();
+                queueNews = r.Next(0, playListNews.Count-1);
+                //queueNews++;
             }
             (sender as DispatcherTimer).Stop();
         }
@@ -662,6 +683,9 @@ namespace TVTK
             Canvas canvas = window.Content as Canvas;
             StackPanel contentControlNews = canvas.Children[1] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
+            SineEase se = new SineEase();
+            se.EasingMode = EasingMode.EaseInOut;
+            thicknessAnimation.EasingFunction = se;
             thicknessAnimation.DecelerationRatio = 0.5;
 
             if (showNews == true)//если истина, то выводим экран новостей
@@ -676,11 +700,15 @@ namespace TVTK
                 thicknessAnimation.To = new Thickness(mediaElement.Width/2, mediaElement.Height, 0, 0);
               //  showNews = false;
             }
-            
 
             thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
+
+            if (mediaElementNews.CanPause)
+            {
+                mediaElement.Pause();
+            }
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
-         
+            mediaElement.Play();
         }
 
         private void btnApplySetting_Click(object sender, RoutedEventArgs e)
@@ -924,6 +952,11 @@ namespace TVTK
         private void btnCheckStatus_Click(object sender, RoutedEventArgs e)
         {
             TV.CheckStatus(viewModelTV);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            TV.WOL(new ObservableCollection<TV>(dgTV.SelectedItems as List<TV>));
         }
     }
 }
