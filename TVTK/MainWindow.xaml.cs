@@ -215,7 +215,7 @@ namespace TVTK
             }
             else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
             {
-                if (DateTime.Now.Minute % 1 == 0)//Properties.Settings.Default.DurationScreenSaver == 0)
+                if (DateTime.Now.Minute % Properties.Settings.Default.DurationScreenSaver == 0)
                 {
                     screenSaver?.StartScreenSaver();
                 }

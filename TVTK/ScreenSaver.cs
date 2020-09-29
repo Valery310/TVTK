@@ -40,6 +40,7 @@ namespace TVTK
                 image.Margin = new System.Windows.Thickness(-50, height, 0,0);
                 canvas.Children.Add(image);
                 image.Visibility = Visibility.Visible;
+                image.RenderTransform = new RotateTransform();
 
                 ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
                 thicknessAnimation.From = image.Margin;
@@ -54,9 +55,8 @@ namespace TVTK
                // image.RenderTransform.BeginAnimation(RotateTransform.AngleProperty, doubleAnimation);
 
                 Storyboard storyboard = new Storyboard();
-                Storyboard.SetTarget(doubleAnimation, image.RenderTransform);
-                Storyboard.SetTargetProperty(doubleAnimation,
-                new PropertyPath(RotateTransform.AngleProperty));
+                Storyboard.SetTarget(doubleAnimation, image);
+                Storyboard.SetTargetProperty(doubleAnimation, new PropertyPath("(UIElement.RenderTransform).(RotateTransform.Angle)"));
 
                 Storyboard.SetTarget(thicknessAnimation, image);
                 Storyboard.SetTargetProperty(thicknessAnimation,
