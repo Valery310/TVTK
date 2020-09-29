@@ -57,6 +57,7 @@ namespace TVTK
         Window window;//окно проигрывателя рекламы/видео
         TypeWork typeWork;
         List<List<MultimediaFile>> settingFromServer;
+        ScreenSaver screenSaver;
    
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
@@ -159,7 +160,10 @@ namespace TVTK
                 viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
             }
 
-            AudioOutput.GetAudio();
+            chbScreenSaver.IsChecked = Properties.Settings.Default.ScreenSaver;
+            tbxDurationScreenSaver.Text = Properties.Settings.Default.DurationScreenSaver.ToString();
+
+         //   AudioOutput.GetAudio();
 
             dgTime.ItemsSource = viewModelTime;
             dgTV.ItemsSource = viewModelTV;
@@ -168,7 +172,6 @@ namespace TVTK
             {
                 ButtonStart_Click(new object(), new RoutedEventArgs());
                 this.WindowState = WindowState.Minimized;
-               //window.Activate();
             }
         }
 
@@ -206,8 +209,17 @@ namespace TVTK
         {
             if (CheckTime() == true && playing == false && StartWithoutTime == false && !showNews)
             {
+                UpdatePlayList();
                 TV.WOL(viewModelTV);
                 mediaElement.Play();
+            }
+            else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
+            {
+                if (DateTime.Now.Minute % 1 == 0)//Properties.Settings.Default.DurationScreenSaver == 0)
+                {
+                    screenSaver?.StartScreenSaver();
+                }
+
             }
         }
 
@@ -231,19 +243,8 @@ namespace TVTK
         }
 
 
-        public void StartPlayer() //Создание окна проигрывателя и его запуск.
+        public void UpdatePlayList() 
         {
-            queue = 1;
-            queueNews = 1;
-
-            if (Properties.Settings.Default.News)
-            {
-                timerStartNews.Tick += new EventHandler(StartNews);
-                timerStartNews.Start();
-                timer.Start();
-            }
-            
-
             switch (Properties.Settings.Default.TypeWork)
             {
                 case (uint)TypeWork.Local:
@@ -251,7 +252,8 @@ namespace TVTK
                     {
                         playList = GetContentLocal(Properties.Settings.Default.LocalPathAdv, lvFiles);
                         playListNews = GetContentLocal(Properties.Settings.Default.LocalPathNews, lvNews);
-                        CreatePlayer();
+
+                       // CreatePlayer();
                         //  UriBuilder uriBuilder = new UriBuilder(@"I:\Videos\Безумный макс.mkv");                                 
                     }
                     else
@@ -272,11 +274,27 @@ namespace TVTK
                     {
                         MessageBox.Show(ex.Message);
                     }
-                    
+
                     break;
                 case (uint)TypeWork.Mixed:
                     break;
             }
+        }
+
+        public void StartPlayer() //Создание окна проигрывателя и его запуск.
+        {
+            queue = 1;
+            queueNews = 1;
+
+            if (Properties.Settings.Default.News)
+            {
+                timerStartNews.Tick += new EventHandler(StartNews);
+                timerStartNews.Start();
+                timer.Start();
+            }
+            
+            UpdatePlayList();
+            CreatePlayer();
 
             if (playList != null)
             {
@@ -337,6 +355,7 @@ namespace TVTK
             mediaElement.MediaEnded += new RoutedEventHandler(mediaElement_MediaEnded);
          //Попытка сделать выбор аудиовыхода   mediaElement.Audi
 
+
             window = null;
             window = new Window();
             window.Title = Properties.Settings.Default.TitlePlayer;
@@ -345,8 +364,9 @@ namespace TVTK
             Canvas canvas = new Canvas();
             canvas.Width = window.Width;
             canvas.Height = window.Height;
-            window.Content = canvas;
+            window.Content = canvas;            
             canvas.Children.Add(mediaElement);
+            screenSaver = new ScreenSaver(canvas);
             window.KeyDown += window_KeyDown;
             window.Cursor = Cursors.None;      
             if (Properties.Settings.Default.News)
@@ -359,7 +379,7 @@ namespace TVTK
             //window.RenderTransform = new ScaleTransform(1 / scaleX, 1 / scaleY);
             //((UIElement)window.Content).RenderTransform = new ScaleTransform(1 / scaleX, 1 / scaleY);
             //  ((UIElement)window.Content).RenderTransform = new ScaleTransform(1, 1);
-            ((UIElement)window.Content).RenderTransform = new ScaleTransform(0.989, 0.989);
+        //    ((UIElement)window.Content).RenderTransform = new ScaleTransform(0.989, 0.989);
             window.Show();
             window.Activate();
             window.Left = Properties.Settings.Default.PositionX;
@@ -374,6 +394,7 @@ namespace TVTK
             // mediaElement.MinHeight = Convert.ToInt32(tbxHeight.Text) * (Convert.ToInt32(tbxMonitors.Text) / 2);
             mediaElement.Height = window.Height;
             mediaElement.Width = window.Width;
+           // mediaElement.Stretch = Stretch.Uniform;
             mediaElement.Stretch = Stretch.UniformToFill;
             mediaElement.LoadedBehavior = MediaState.Manual;
             mediaElement.UnloadedBehavior = MediaState.Manual;
@@ -415,12 +436,10 @@ namespace TVTK
         {
             var temp = new List<Uri>();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            foreach (var item in directoryInfo.GetFiles())
+            var allowedExtensions = new[] { ".mkv", ".mp4", ".avi", ".jpg", ".mov", ".png" };
+            foreach (var item in directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Where(file => allowedExtensions.Any(file.Extension.ToLower().EndsWith)))
             {
-                if (item.Extension.ToLower() == ".mkv" || item.Extension.ToLower() == ".mp4" || item.Extension.ToLower() == ".avi"  || item.Extension.ToLower() == ".jpg" || item.Extension.ToLower() == ".mov")
-                {
-                    temp.Add(new Uri(item.FullName, UriKind.Absolute));
-                }            
+                    temp.Add(new Uri(item.FullName, UriKind.Absolute));          
             }
             lvPlaylist.ItemsSource = null;
             lvPlaylist.Items.Clear();
@@ -794,6 +813,13 @@ namespace TVTK
             {
                 settings = false;
                 error += "\nИмя плеера должно быть указано!.";
+            }
+
+            uint temp = 0;
+            if (chbScreenSaver.IsChecked == true && uint.TryParse(tbxDurationScreenSaver.Text, out temp))
+            {
+                Properties.Settings.Default.ScreenSaver = true;
+                Properties.Settings.Default.DurationScreenSaver = temp;
             }
 
             if (settings) //итоговая проверка. Сохранение или вывод всех ошибок.
