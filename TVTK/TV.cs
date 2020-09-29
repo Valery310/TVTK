@@ -125,8 +125,14 @@ namespace TVTK
         {
             foreach (var item in AllTV)
             {
-                EasyWakeOnLanClient WOLClient = new EasyWakeOnLanClient();
-                await WOLClient.WakeAsync(item.Mac.ToString());
+                await Task.Run(()=>{
+                    EasyWakeOnLanClient WOLClient = new EasyWakeOnLanClient();
+                    for (int i = 0; i < 15; i++)
+                    {
+                        WOLClient.Wake(item.Mac.ToString());
+                    }             
+                });
+               
             }
         }
 

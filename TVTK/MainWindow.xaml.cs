@@ -231,7 +231,7 @@ namespace TVTK
         }
 
 
-        public async void StartPlayer() //Создание окна проигрывателя и его запуск.
+        public void StartPlayer() //Создание окна проигрывателя и его запуск.
         {
             queue = 1;
             queueNews = 1;
@@ -956,7 +956,13 @@ namespace TVTK
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            TV.WOL(new ObservableCollection<TV>(dgTV.SelectedItems as List<TV>));
+            var t = dgTV.SelectedItems;
+            ObservableCollection<TV> ot = new ObservableCollection<TV>();
+            foreach (var item in t)
+            {
+                ot.Add(item as TV);
+            }
+            TV.WOL(ot);
         }
     }
 }

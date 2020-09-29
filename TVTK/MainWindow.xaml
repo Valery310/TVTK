@@ -109,5 +109,8 @@
         <Label Content="Имя плеера" HorizontalAlignment="Left" Margin="494,36,0,0" VerticalAlignment="Top"/>
         <Button x:Name="btnCheckStatus" Content="Проверить доступность" HorizontalAlignment="Left" Margin="532,430,0,0" VerticalAlignment="Top" Width="140" Height="29" Click="btnCheckStatus_Click"/>
         <Button x:Name="btnSelectedWOLTV" Content="Разбудить выбранные" HorizontalAlignment="Left" Margin="385,430,0,0" VerticalAlignment="Top" Width="134" Height="29" Click="Button_Click"/>
+        <Label Content="Частота показа" HorizontalAlignment="Left" Margin="624,105,0,0" VerticalAlignment="Top" Width="99"/>
+        <CheckBox Content="Хранитель экрана" HorizontalAlignment="Left" Margin="627,76,0,0" VerticalAlignment="Top" Width="143"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="728,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="42"/>
     </Grid>
 </Window>
