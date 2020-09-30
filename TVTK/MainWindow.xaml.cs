@@ -211,13 +211,13 @@ namespace TVTK
         {
             if (CheckTime() == true && playing == false && StartWithoutTime == false && !showNews)
             {
-                UpdatePlayList();
+                //UpdatePlayList();
                 TV.WOL(viewModelTV);
                 mediaElement.Play();
             }
             else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
             {
-                mediaElement.Close();
+               // mediaElement.Close();
                 if (DateTime.Now.Minute % Properties.Settings.Default.DurationScreenSaver == 0)
                 {
                     screenSaver?.StartScreenSaver();
@@ -324,10 +324,11 @@ namespace TVTK
                 mediaElement.Pause();
                 mediaElementNews.Source = playListNews.FirstOrDefault();
                 
-                queueNews++;
+               // queueNews++;
                 showNews = true;                
                 AnimationNews();
-               // mediaElementNews.Focus();
+                // mediaElementNews.Focus();
+                mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 1);
                 mediaElementNews.Play();
             }
         }
@@ -339,10 +340,11 @@ namespace TVTK
                 timerStartNews.Start();
                 timerEndNews.Tick -= new EventHandler(StopNews);
                 timerEndNews.Stop();
-                mediaElementNews.Close();                
+                mediaElementNews.Pause();                
                 showNews = false;
                 AnimationNews();
-              //  mediaElement.Focus();
+                //  mediaElement.Focus();
+                mediaElement.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 1);
                 mediaElement.Play();
             }
         }
@@ -429,9 +431,46 @@ namespace TVTK
                 }
                 mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElement.Play();
-                queue = random.Next(0, playList.Count - 1);
+                queue = random.Next(1, playList.Count - 1);
                 // queue++;
             }
+        }
+
+        private void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            //вероятно, потребуется какя-то проверка времени при старте.
+        }
+
+        private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            mediaElementNews.Pause();
+            timerDurationShowNews.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            mediaElementNews.Close();
+            if ((CheckTime() || StartWithoutTime) && showNews)
+            {
+                if (queueNews > playListNews.Count)
+                {
+                    queueNews = 1;
+                }
+                try
+                {
+                    mediaElementNews.Source = playListNews[queueNews - 1];
+                }
+                catch (Exception)
+                {
+                    mediaElementNews.Source = playListNews[0];
+                }
+
+                mediaElementNews.Position = TimeSpan.FromSeconds(0);
+                mediaElementNews.Play();
+                queueNews = random.Next(1, playListNews.Count - 1);
+                //queueNews++;
+            }
+            (sender as DispatcherTimer).Stop();
         }
 
         public List<Uri> GetContentLocal(string path, ListView lvPlaylist) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
@@ -550,7 +589,7 @@ namespace TVTK
                     }
                     else
                     {
-                        mediaElementNews.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 10);
+                        mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 10);
                     }                    
                     break;
                 case Key.Up:
@@ -671,43 +710,6 @@ namespace TVTK
             throw new NotImplementedException();
         }
 
-        private void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
-        {
-            //вероятно, потребуется какя-то проверка времени при старте.
-        }
-
-        private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
-        {
-            mediaElementNews.Pause();
-            timerDurationShowNews.Start();
-        }
-
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            mediaElementNews.Close();
-            if ((CheckTime() || StartWithoutTime) && showNews)
-            {
-                if (queueNews > playListNews.Count)
-                {
-                    queueNews = 1;
-                }
-                try
-                {
-                    mediaElementNews.Source = playListNews[queueNews - 1];
-                }
-                catch (Exception)
-                {
-                    mediaElementNews.Source = playListNews[0];
-                }
-                
-                mediaElementNews.Position = TimeSpan.FromSeconds(0);
-                mediaElementNews.Play();
-                queueNews = random.Next(0, playListNews.Count-1);
-                //queueNews++;
-            }
-            (sender as DispatcherTimer).Stop();
-        }
-
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
             Canvas canvas = window.Content as Canvas;
@@ -738,7 +740,7 @@ namespace TVTK
             //    mediaElementNews.Pause();
             //}
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
-            mediaElement.Play();
+         //   mediaElement.Play();
         }
 
         private void btnApplySetting_Click(object sender, RoutedEventArgs e)
