@@ -58,7 +58,8 @@ namespace TVTK
         TypeWork typeWork;
         List<List<MultimediaFile>> settingFromServer;
         ScreenSaver screenSaver;
-   
+        static Random random;
+
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
         {
@@ -76,6 +77,7 @@ namespace TVTK
         public MainWindow()
         {
             InitializeComponent();
+            random = new Random();
             tbxHeight.Text = Properties.Settings.Default.Height.ToString();
             tbxWidth.Text = Properties.Settings.Default.Width.ToString();
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
@@ -215,11 +217,11 @@ namespace TVTK
             }
             else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
             {
+                mediaElement.Close();
                 if (DateTime.Now.Minute % Properties.Settings.Default.DurationScreenSaver == 0)
                 {
                     screenSaver?.StartScreenSaver();
-                }
-
+                }     
             }
         }
 
@@ -321,11 +323,12 @@ namespace TVTK
                 //  CreateNewWindow(window.Content as Canvas);
                 mediaElement.Pause();
                 mediaElementNews.Source = playListNews.FirstOrDefault();
-                mediaElementNews.Play();
+                
                 queueNews++;
                 showNews = true;                
                 AnimationNews();
-                mediaElementNews.Focus();
+               // mediaElementNews.Focus();
+                mediaElementNews.Play();
             }
         }
 
@@ -336,11 +339,11 @@ namespace TVTK
                 timerStartNews.Start();
                 timerEndNews.Tick -= new EventHandler(StopNews);
                 timerEndNews.Stop();
-                mediaElement.Play();
-                mediaElementNews.Pause();
+                mediaElementNews.Close();                
                 showNews = false;
                 AnimationNews();
-                mediaElement.Focus();
+              //  mediaElement.Focus();
+                mediaElement.Play();
             }
         }
 
@@ -426,8 +429,7 @@ namespace TVTK
                 }
                 mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElement.Play();
-                Random r = new Random();
-                queue = r.Next(0, playList.Count - 1);
+                queue = random.Next(0, playList.Count - 1);
                 // queue++;
             }
         }
@@ -590,7 +592,17 @@ namespace TVTK
                     {
                         mediaElementNews.Volume -= 0.05D;
                     }                
-                    break;                       
+                    break;
+                case Key.N:
+                    if (!showNews)
+                    {
+                        mediaElement_MediaEnded(mediaElement, new RoutedEventArgs());                     
+                    }
+                    else
+                    {
+                        MediaElementNews_MediaEnded(mediaElementNews, new RoutedEventArgs());
+                    }
+                    break;
             }
         }
 
@@ -690,8 +702,7 @@ namespace TVTK
                 
                 mediaElementNews.Position = TimeSpan.FromSeconds(0);
                 mediaElementNews.Play();
-                Random r = new Random();
-                queueNews = r.Next(0, playListNews.Count-1);
+                queueNews = random.Next(0, playListNews.Count-1);
                 //queueNews++;
             }
             (sender as DispatcherTimer).Stop();
@@ -700,7 +711,7 @@ namespace TVTK
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
             Canvas canvas = window.Content as Canvas;
-            StackPanel contentControlNews = canvas.Children[1] as StackPanel;
+            StackPanel contentControlNews = canvas.Children[2] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
             SineEase se = new SineEase();
             se.EasingMode = EasingMode.EaseInOut;
@@ -722,10 +733,10 @@ namespace TVTK
 
             thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
 
-            if (mediaElementNews.CanPause)
-            {
-                mediaElement.Pause();
-            }
+            //if (mediaElementNews.CanPause)
+            //{
+            //    mediaElementNews.Pause();
+            //}
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
             mediaElement.Play();
         }

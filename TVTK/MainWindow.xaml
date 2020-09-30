@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:local="clr-namespace:TVTK"
         mc:Ignorable="d"
-        Title="ТВ Фойе" Height="536.4" Width="1338.2">
+        Title="ТВ ТКС" Height="536.4" Width="1338.2">
     <!-- <Window.Resources>
         <local:TimesViewModel x:Key="viewModel">
         </local:TimesViewModel>
