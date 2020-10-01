@@ -58,14 +58,14 @@ namespace TVTK
 
 
 
-        public void StartScreenSaver() 
+        public void StartScreenSaver(int half = 1) 
         {
             imageList = UpdateList();
             if (imageList.Count>0)
             {
                 bitmapImage = new BitmapImage(imageList[random.Next(0, imageList.Count - 1)]);                
                 image.Source = bitmapImage;
-                int height = random.Next(0, Convert.ToInt32(canvas.Height));
+                int height = random.Next(0, Convert.ToInt32((canvas.Height/2)*half));
                 thicknessAnimation.To = new System.Windows.Thickness(Convert.ToInt32(canvas.Width + 50), height, 0, 0);
                 image.Margin = new System.Windows.Thickness(-50, height, 0,0);
                 //canvas.Children.Add(image);

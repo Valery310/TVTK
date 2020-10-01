@@ -217,10 +217,15 @@ namespace TVTK
             }
             else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
             {
-               // mediaElement.Close();
+                if (mediaElement.NaturalDuration.TimeSpan.TotalSeconds == 0 && mediaElementNews.NaturalDuration.TimeSpan.TotalSeconds == 0)
+                {
+                    mediaElement.Close();
+                    mediaElementNews.Close();
+                }
                 if (DateTime.Now.Minute % Properties.Settings.Default.DurationScreenSaver == 0)
                 {
-                    screenSaver?.StartScreenSaver();
+                    screenSaver?.StartScreenSaver(1);
+                    screenSaver?.StartScreenSaver(2);
                 }     
             }
         }
@@ -327,9 +332,13 @@ namespace TVTK
                // queueNews++;
                 showNews = true;                
                 AnimationNews();
-                // mediaElementNews.Focus();
+                mediaElementNews.Focus(); //закомментить
                 mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 1);
                 mediaElementNews.Play();
+                if (mediaElementNews.NaturalDuration.TimeSpan.TotalSeconds == 0)
+                {
+                    MediaElementNews_MediaEnded(mediaElement, new RoutedEventArgs());
+                }
             }
         }
 
@@ -343,9 +352,13 @@ namespace TVTK
                 mediaElementNews.Pause();                
                 showNews = false;
                 AnimationNews();
-                //  mediaElement.Focus();
+                mediaElement.Focus();//закомментить
                 mediaElement.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 1);
                 mediaElement.Play();
+                if (mediaElement.NaturalDuration.TimeSpan.TotalSeconds ==0 ) 
+                {
+                    mediaElement_MediaEnded(mediaElement, new RoutedEventArgs());
+                }
             }
         }
 
@@ -493,7 +506,7 @@ namespace TVTK
             var Temp = new List<Uri>();
             foreach (var item in playLists)
             {
-                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (TypeContent)item.TypeContent).Uri);              
+                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (TypeContent)item.typeContent).Uri);              
             }
             
             return Temp;
