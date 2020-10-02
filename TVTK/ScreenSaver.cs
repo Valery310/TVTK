@@ -33,6 +33,7 @@ namespace TVTK
             image = new System.Windows.Controls.Image();
             image.MaxHeight = canvas.Height * 0.1;
             image.MaxWidth = canvas.Width * 0.1;
+            image.Margin = new Thickness(-50, random.Next(0, Convert.ToInt32(canvas.Height/2)),0,0);
             canvas.Children.Add(image);
             image.RenderTransform = new RotateTransform();
 
@@ -65,9 +66,17 @@ namespace TVTK
             {
                 bitmapImage = new BitmapImage(imageList[random.Next(0, imageList.Count - 1)]);                
                 image.Source = bitmapImage;
-                int height = random.Next(0, Convert.ToInt32((canvas.Height/2)*half));
-                thicknessAnimation.To = new System.Windows.Thickness(Convert.ToInt32(canvas.Width + 50), height, 0, 0);
-                image.Margin = new System.Windows.Thickness(-50, height, 0,0);
+                int height = random.Next(0, Convert.ToInt32(canvas.Height/2));
+                image.Margin = new System.Windows.Thickness(-50, height, 0, 0);
+
+                if (half == 2)
+                {
+                    image.Margin = new Thickness(-50, random.Next(Convert.ToInt32(canvas.Height / 2), Convert.ToInt32(canvas.Height)), 0, 0);
+                    height = random.Next(Convert.ToInt32(canvas.Height / 2), Convert.ToInt32(canvas.Height));
+                    thicknessAnimation.From = image.Margin;
+                }
+
+                thicknessAnimation.To = new System.Windows.Thickness(Convert.ToInt32(canvas.Width + 50), height, 0, 0);               
                 //canvas.Children.Add(image);
                 image.Visibility = Visibility.Visible;
 

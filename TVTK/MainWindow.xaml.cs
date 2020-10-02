@@ -31,6 +31,7 @@ using Newtonsoft.Json;
 using System.Text.Encodings.Web;
 using System.Web;
 using System.Media;
+using Newtonsoft.Json.Serialization;
 //using NAudio.CoreAudioApi;
 
 namespace TVTK
@@ -58,7 +59,8 @@ namespace TVTK
         TypeWork typeWork;
         List<List<MultimediaFile>> settingFromServer;
         ScreenSaver screenSaver;
-        static Random random;
+        ScreenSaver screenSaver1;
+        static ThreadLocal<Random> random;
 
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
@@ -77,7 +79,9 @@ namespace TVTK
         public MainWindow()
         {
             InitializeComponent();
-            random = new Random();
+            int seek = Environment.TickCount;
+            random = new ThreadLocal<Random>(() =>
+         new Random(Interlocked.Increment(ref seek)));
             tbxHeight.Text = Properties.Settings.Default.Height.ToString();
             tbxWidth.Text = Properties.Settings.Default.Width.ToString();
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
@@ -217,7 +221,7 @@ namespace TVTK
             }
             else if (CheckTime() == false && playing == false && StartWithoutTime == false && !showNews && chbScreenSaver.IsChecked == true) 
             {
-                if (mediaElement.NaturalDuration.TimeSpan.TotalSeconds == 0 && mediaElementNews.NaturalDuration.TimeSpan.TotalSeconds == 0)
+                if (mediaElement.HasAudio == false && mediaElementNews.HasAudio == false)
                 {
                     mediaElement.Close();
                     mediaElementNews.Close();
@@ -225,7 +229,7 @@ namespace TVTK
                 if (DateTime.Now.Minute % Properties.Settings.Default.DurationScreenSaver == 0)
                 {
                     screenSaver?.StartScreenSaver(1);
-                    screenSaver?.StartScreenSaver(2);
+                    screenSaver1?.StartScreenSaver(2);
                 }     
             }
         }
@@ -305,7 +309,7 @@ namespace TVTK
 
             if (playList != null)
             {
-                mediaElement.Source = playList.FirstOrDefault();
+                mediaElement.Source = playList[random.Value.Next(0, playList.Count)];
                 queue++;
                 if (StartWithoutTime)
                 {
@@ -327,18 +331,24 @@ namespace TVTK
                 timerEndNews.Start();
                 //  CreateNewWindow(window.Content as Canvas);
                 mediaElement.Pause();
-                mediaElementNews.Source = playListNews.FirstOrDefault();
-                
-               // queueNews++;
+                if (mediaElementNews.Source == null)
+                {
+                    mediaElementNews.Source = playListNews[random.Value.Next(0, playListNews.Count)];
+                }
+                else if (mediaElementNews.HasAudio == false)
+                {
+                    mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 1);
+                }
                 showNews = true;                
                 AnimationNews();
                 mediaElementNews.Focus(); //закомментить
-                mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 1);
+                //if (mediaElementNews.HasAudio == false)
+                //{
+                //    Timer_Tick(mediaElementNews, new EventArgs());
+                //}
+
                 mediaElementNews.Play();
-                if (mediaElementNews.NaturalDuration.TimeSpan.TotalSeconds == 0)
-                {
-                    MediaElementNews_MediaEnded(mediaElement, new RoutedEventArgs());
-                }
+                
             }
         }
 
@@ -355,7 +365,7 @@ namespace TVTK
                 mediaElement.Focus();//закомментить
                 mediaElement.Position = mediaElement.Position - new TimeSpan(0, 0, 0, 1);
                 mediaElement.Play();
-                if (mediaElement.NaturalDuration.TimeSpan.TotalSeconds ==0 ) 
+                if (mediaElement.HasAudio == false) 
                 {
                     mediaElement_MediaEnded(mediaElement, new RoutedEventArgs());
                 }
@@ -385,6 +395,7 @@ namespace TVTK
             window.Content = canvas;            
             canvas.Children.Add(mediaElement);
             screenSaver = new ScreenSaver(canvas);
+            screenSaver1 = new ScreenSaver(canvas);
             window.KeyDown += window_KeyDown;
             window.Cursor = Cursors.None;      
             if (Properties.Settings.Default.News)
@@ -426,7 +437,7 @@ namespace TVTK
 
         void mediaElement_MediaEnded(object sender, RoutedEventArgs e)//Выполняется при окончаниипроигрывания ролика
         {
-            mediaElement.Close();
+           // mediaElement.Close();
             playing = false;
             if (CheckTime() || StartWithoutTime)
             {
@@ -442,27 +453,41 @@ namespace TVTK
                 {
                     mediaElement.Source = playList[0];
                 }
-                mediaElement.Position = TimeSpan.FromSeconds(0);
+
+                //mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElement.Play();
-                queue = random.Next(1, playList.Count - 1);
+                queue = random.Value.Next(1, playList.Count);
                 // queue++;
             }
         }
 
         private void MediaElementNews_MediaOpened(object sender, RoutedEventArgs e)
         {
-            //вероятно, потребуется какя-то проверка времени при старте.
+            if (mediaElementNews.HasAudio == false)
+            {
+        //        mediaElementNews.Clock.IsPaused; mediaElement.SpeedRatio;mediaElement.star
+            }
         }
 
         private void MediaElementNews_MediaEnded(object sender, RoutedEventArgs e)
         {
-            mediaElementNews.Pause();
-            timerDurationShowNews.Start();
+            if (mediaElementNews.HasAudio == false)
+            {
+                mediaElementNews.Pause();
+                mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0, 0, 0, 1);
+                // mediaElement.Position = TimeSpan.FromSeconds(0);
+                timerDurationShowNews.Start();
+            }
+            else
+            {
+                Timer_Tick(sender, new EventArgs());
+            }
+            
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            mediaElementNews.Close();
+           // mediaElementNews.Close();
             if ((CheckTime() || StartWithoutTime) && showNews)
             {
                 if (queueNews > playListNews.Count)
@@ -477,18 +502,34 @@ namespace TVTK
                 {
                     mediaElementNews.Source = playListNews[0];
                 }
-
-                mediaElementNews.Position = TimeSpan.FromSeconds(0);
+                
+                //if (mediaElementNews.HasAudio == false)
+                //{
+                //  //  mediaElementNews.Position = mediaElementNews.Position - new TimeSpan(0,0,0,1);
+                //}
+              //  mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElementNews.Play();
-                queueNews = random.Next(1, playListNews.Count - 1);
-                //queueNews++;
+                //queueNews = random.Next(1, playListNews.Count);
+                (sender as DispatcherTimer)?.Stop();
+                queueNews++;
             }
-            (sender as DispatcherTimer).Stop();
+            
         }
 
         public List<Uri> GetContentLocal(string path, ListView lvPlaylist) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
         {
             var temp = new List<Uri>();
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+                    
+            path = Directory.Exists(path) ? path: Directory.GetCurrentDirectory();
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
             var allowedExtensions = new[] { ".mkv", ".mp4", ".avi", ".jpg", ".mov", ".png" };
             foreach (var item in directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Where(file => allowedExtensions.Any(file.Extension.ToLower().EndsWith)))
@@ -682,7 +723,7 @@ namespace TVTK
             contentControlNews.Height = canvas.Height;
 
             //contentControlNews.Background = new SolidColorBrush(Colors.White);
-             contentControlNews.Background = new SolidColorBrush(Colors.Transparent);
+             contentControlNews.Background = new SolidColorBrush(Colors.Black);
             //  ImageBrush imageBrush = new ImageBrush(new BitmapImage(new Uri(@".\TKS.png", UriKind.Relative)));
             //   contentControlNews.Background = imageBrush;
             mediaElementNews = new MediaElement();
@@ -694,6 +735,7 @@ namespace TVTK
             mediaElementNews.MediaEnded += MediaElementNews_MediaEnded; ;
             mediaElementNews.KeyDown += MediaElementNews_KeyDown;
             mediaElementNews.Stretch = Stretch.UniformToFill;
+            
           //  mediaElementNews.SpeedRatio = 0.80;
             contentControlNews.Children.Add(mediaElementNews);
             contentControlNews.Margin = new Thickness(canvas.Width/2, canvas.Height, -contentControlNews.Width, 0);
@@ -726,7 +768,7 @@ namespace TVTK
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
             Canvas canvas = window.Content as Canvas;
-            StackPanel contentControlNews = canvas.Children[2] as StackPanel;
+            StackPanel contentControlNews = canvas.Children[3] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
             SineEase se = new SineEase();
             se.EasingMode = EasingMode.EaseInOut;
