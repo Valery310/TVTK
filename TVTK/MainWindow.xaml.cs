@@ -437,7 +437,7 @@ namespace TVTK
 
         void mediaElement_MediaEnded(object sender, RoutedEventArgs e)//Выполняется при окончаниипроигрывания ролика
         {
-           // mediaElement.Close();
+            mediaElement.Close();
             playing = false;
             if (CheckTime() || StartWithoutTime)
             {
@@ -487,7 +487,7 @@ namespace TVTK
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-           // mediaElementNews.Close();
+            mediaElementNews.Close();
             if ((CheckTime() || StartWithoutTime) && showNews)
             {
                 if (queueNews > playListNews.Count)
