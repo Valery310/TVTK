@@ -60,7 +60,8 @@ namespace TVTK
         List<List<MultimediaFile>> settingFromServer;
         ScreenSaver screenSaver;
         ScreenSaver screenSaver1;
-        static ThreadLocal<Random> random;
+       // static ThreadLocal<Random> random;
+        static Random random;
 
 
         public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
@@ -75,13 +76,18 @@ namespace TVTK
             set;
         }
 
+        public static Random GetThreadRandom()
+        {
+            return random;
+           // return random.Value;
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             int seek = Environment.TickCount;
-            random = new ThreadLocal<Random>(() =>
-         new Random(Interlocked.Increment(ref seek)));
+            random = new Random(seek);//new ThreadLocal<Random>(() =>
+         //new Random(Interlocked.Increment(ref seek)));
             tbxHeight.Text = Properties.Settings.Default.Height.ToString();
             tbxWidth.Text = Properties.Settings.Default.Width.ToString();
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
@@ -309,8 +315,8 @@ namespace TVTK
 
             if (playList != null)
             {
-                mediaElement.Source = playList[random.Value.Next(0, playList.Count)];
-                queue++;
+                mediaElement.Source = playList[GetThreadRandom().Next(0, playList.Count)];
+               // queue++;
                 if (StartWithoutTime)
                 {
                     mediaElement.Play();
@@ -333,7 +339,7 @@ namespace TVTK
                 mediaElement.Pause();
                 if (mediaElementNews.Source == null)
                 {
-                    mediaElementNews.Source = playListNews[random.Value.Next(0, playListNews.Count)];
+                    mediaElementNews.Source = playListNews[GetThreadRandom().Next(0, playListNews.Count)];
                 }
                 else if (mediaElementNews.HasAudio == false)
                 {
@@ -456,7 +462,7 @@ namespace TVTK
 
                 //mediaElement.Position = TimeSpan.FromSeconds(0);
                 mediaElement.Play();
-                queue = random.Value.Next(1, playList.Count);
+                queue = GetThreadRandom().Next(1, playList.Count);
                 // queue++;
             }
         }
@@ -1030,7 +1036,7 @@ namespace TVTK
 
         private void tbxWidth_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !(Char.IsDigit(e.Text, 0));
+            //e.Handled = !(Char.IsDigit(e.Text, 0));
         }
 
         private void tbxMACTV_PreviewTextInput(object sender, TextCompositionEventArgs e)
