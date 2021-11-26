@@ -12,7 +12,7 @@ using System.Windows.Controls;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace TVTK
+namespace TVTK.Controller
 {
     public class TV : INotifyPropertyChanged
     {

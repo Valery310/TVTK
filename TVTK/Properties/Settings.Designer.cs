@@ -8,6 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using TVTK.Controller;
+using TVTK.Entity;
+
 namespace TVTK.Properties {
     
     
@@ -25,9 +28,9 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<TVTK.Time> Time {
+        public global::System.Collections.Generic.List<TimeOfPlaying> Time {
             get {
-                return ((global::System.Collections.Generic.List<TVTK.Time>)(this["Time"]));
+                return ((global::System.Collections.Generic.List<TimeOfPlaying>)(this["Time"]));
             }
             set {
                 this["Time"] = value;
@@ -36,9 +39,9 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<TVTK.TV> TVs {
+        public global::System.Collections.Generic.List<TV> TVs {
             get {
-                return ((global::System.Collections.Generic.List<TVTK.TV>)(this["TVs"]));
+                return ((global::System.Collections.Generic.List<TV>)(this["TVs"]));
             }
             set {
                 this["TVs"] = value;

@@ -107,7 +107,7 @@ namespace TVTK
         private List<Uri> UpdateList() 
         {
             FileInfo[] images;
-            var dir = new DirectoryInfo(@".\ScreenSaver");
+            var dir = new DirectoryInfo(@".\ScreenSaver\Image");
             images = dir.GetFiles("*.png", SearchOption.AllDirectories);
       
             List<Uri> Temp = new List<Uri>();

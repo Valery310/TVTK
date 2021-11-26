@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
-namespace TVTK
+namespace TVTK.Controller
 {
     class AudioOutput
     {

@@ -32,6 +32,12 @@ using System.Text.Encodings.Web;
 using System.Web;
 using System.Media;
 using Newtonsoft.Json.Serialization;
+using NLog;
+using TVTK.Entity;
+using TVTK.Controller;
+using TVTK.Playlist;
+using TVTK.Enums;
+using NLog.Config;
 //using NAudio.CoreAudioApi;
 
 namespace TVTK
@@ -42,6 +48,8 @@ namespace TVTK
     /// 
     public partial class MainWindow : Window
     {
+        public static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         MediaElement mediaElement; // Проигрыватель рекламы
         MediaElement mediaElementNews;// Проигрыватель новостей
         List<Uri> playList; // плейлист рекламы
@@ -57,14 +65,14 @@ namespace TVTK
         bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
         Window window;//окно проигрывателя рекламы/видео
         TypeWork typeWork;
-        List<List<MultimediaFile>> settingFromServer;
+        List<List<MediaFile>> settingFromServer;
         ScreenSaver screenSaver;
         ScreenSaver screenSaver1;
        // static ThreadLocal<Random> random;
         static Random random;
 
 
-        public ObservableCollection<Time> viewModelTime //Коллекция времени работы плеера
+        public ObservableCollection<TimeOfPlaying> viewModelTime //Коллекция времени работы плеера
         {
             get;
             set;
@@ -84,10 +92,14 @@ namespace TVTK
 
         public MainWindow()
         {
+            LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
+
+            Logger.Info("Старт инициализации компонентонв программы");
+  
             InitializeComponent();
+
             int seek = Environment.TickCount;
-            random = new Random(seek);//new ThreadLocal<Random>(() =>
-         //new Random(Interlocked.Increment(ref seek)));
+            random = new Random(seek);
             tbxHeight.Text = Properties.Settings.Default.Height.ToString();
             tbxWidth.Text = Properties.Settings.Default.Width.ToString();
             typeWork = (TypeWork)Properties.Settings.Default.TypeWork;
@@ -146,7 +158,7 @@ namespace TVTK
 
             if (Properties.Settings.Default.Time == null) //первичная инициализация параметра времени работы. Если он пустой, то надо создать.
             {
-                Properties.Settings.Default.Time = new List<Time>();
+                Properties.Settings.Default.Time = new List<TimeOfPlaying>();
             }
 
             if (Properties.Settings.Default.TVs == null) //первичная инициализация параметра времени работы. Если он пустой, то надо создать.
@@ -161,15 +173,15 @@ namespace TVTK
             }
             viewModelTV.CollectionChanged += ViewModelTV_CollectionChanged;
 
-            viewModelTime = new ObservableCollection<Time>(Properties.Settings.Default.Time);
+            viewModelTime = new ObservableCollection<TimeOfPlaying>(Properties.Settings.Default.Time);
 
             viewModelTime.CollectionChanged += ViewModelTime_CollectionChanged;
 
             if (viewModelTime.Count == 0)//если в параметре времени работы нет параметров,то надо их инициализировать дефолтными значениями
             {
-                viewModelTime.Add(new Time { From = "08:00", Before = "09:00" });
-                viewModelTime.Add(new Time { From = "11:30", Before = "13:00" });
-                viewModelTime.Add(new Time { From = "16:00", Before = "17:00" });
+                viewModelTime.Add(new TimeOfPlaying { From = DateTimeOffset.Parse("08:00"), Before = DateTimeOffset.Parse("09:00") });
+                viewModelTime.Add(new TimeOfPlaying { From = DateTimeOffset.Parse("11:30"), Before = DateTimeOffset.Parse("13:00") });
+                viewModelTime.Add(new TimeOfPlaying { From = DateTimeOffset.Parse("16:00"), Before = DateTimeOffset.Parse("17:00") });
             }
 
             chbScreenSaver.IsChecked = Properties.Settings.Default.ScreenSaver;
@@ -196,7 +208,7 @@ namespace TVTK
         private void ViewModelTime_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             
-            Properties.Settings.Default.Time = viewModelTime.ToList<Time>();
+            Properties.Settings.Default.Time = viewModelTime.ToList<TimeOfPlaying>();
             Properties.Settings.Default.Save();
         }
 
@@ -242,16 +254,28 @@ namespace TVTK
 
         public bool CheckTime() //Проверка времени работы. Происходит каждую минуту по таймеру.
         {
-            TimeSpan timeSpanFrom;
-            TimeSpan timeSpanBefore;
-            TimeSpan dateTime = TimeSpan.Parse(DateTime.Now.ToString("HH:mm"));
+           // TimeSpan timeSpanFrom;
+           // TimeSpan timeSpanBefore;
+          //  TimeSpan dateTime = TimeSpan.Parse(DateTime.Now.ToString("HH:mm"));
+            DateTimeOffset dateTimeOffset = DateTimeOffset.Now;
 
             foreach (var item in viewModelTime)
             {
-                timeSpanFrom = TimeSpan.Parse(item.From);
-                timeSpanBefore = TimeSpan.Parse(item.Before);
+                //timeSpanFrom = TimeSpan.Parse(item.From);
+                //timeSpanBefore = TimeSpan.Parse(item.Before);
 
-                 if (dateTime >= timeSpanFrom && dateTime <= timeSpanBefore)
+                // if (dateTime >= timeSpanFrom && dateTime <= timeSpanBefore)
+                //{
+                //    return true;
+                //}
+
+                //Перспективный метод
+                //if (dateTimeOffset >= item.From && dateTimeOffset <= item.Before)
+                //{
+                //    return true;
+                //}
+
+                if (DateTimeOffset.Compare(dateTimeOffset, item.From) >= 0 && DateTimeOffset.Compare(dateTimeOffset, item.Before) <= 0)
                 {
                     return true;
                 }
@@ -522,68 +546,7 @@ namespace TVTK
             
         }
 
-        public List<Uri> GetContentLocal(string path, ListView lvPlaylist) //Получает список файлов для проигрывания с указанным расширением и только в открытой директории. Подкаталоги пока еще не смотрит. Передает коллекцию в плелист
-        {
-            var temp = new List<Uri>();
-            try
-            {
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-                    
-            path = Directory.Exists(path) ? path: Directory.GetCurrentDirectory();
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            var allowedExtensions = new[] { ".mkv", ".mp4", ".avi", ".jpg", ".mov", ".png" };
-            foreach (var item in directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Where(file => allowedExtensions.Any(file.Extension.ToLower().EndsWith)))
-            {
-                    temp.Add(new Uri(item.FullName, UriKind.Absolute));          
-            }
-            lvPlaylist.ItemsSource = null;
-            lvPlaylist.Items.Clear();
-            lvPlaylist.ItemsSource = temp;
-            return temp;
-        }
-
-        public List<Uri> GetContentLan(List<PlayList> playLists)//List<List<MultimediaFile>> multimediaFiles) //нужно разделить на разные плейлисты.
-        {
-            var Temp = new List<Uri>();
-            foreach (var item in playLists)
-            {
-                Temp.Add(new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer, "/getmultimedia", "?stream=" + Properties.Settings.Default.Stream + "&content=" + (TypeContent)item.typeContent).Uri);              
-            }
-            
-            return Temp;
-        }
-
-        public async Task<List<List<MultimediaFile>>> GetPropertiesFromServer() 
-        {
-            var addressServer = new UriBuilder("http", Properties.Settings.Default.AdressServer, (int)Properties.Settings.Default.PortServer).Uri;
-            //     var Stream = Properties.Settings.Default.Stream;
-
-            var localAdress = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
-            var iPAddressLocal = localAdress.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork
-            && !IPAddress.IsLoopback(ip)
-            && !ip.ToString().StartsWith("169.254."));
-
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync(addressServer + "getmultimedia");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var product = await response.Content.ReadAsStringAsync();
-                var obj = JsonConvert.DeserializeObject<List<List<MultimediaFile>>>(product);
-                return obj;//  playList = GetVideosLan(obj);
-            }
-            else
-            {
-                MessageBox.Show("Нет ответа от сервера.");
-                return null;
-            }
-        }
+        
 
         private void MediaElement_KeyDown(object sender, KeyEventArgs e)
         {
@@ -707,12 +670,13 @@ namespace TVTK
 
         private void btnAddTime_Click(object sender, RoutedEventArgs e)//Добавление времени работы
         {
-            var time = new Time();
-
-            time.Before = tbxBreakBefore.Text;
-            time.From = tbxBreakFrom.Text; 
+            var time = new TimeOfPlaying();
+            DateTimeOffset TempTime;
+            DateTimeOffset.TryParse(tbxBreakBefore.Text,out TempTime);
+            time.Before = TempTime;
+            DateTimeOffset.TryParse(tbxBreakBefore.Text, out TempTime);
+            time.From = TempTime; 
             viewModelTime.Add(time);
-
         }
         
         private void btnDelTime_Click(object sender, RoutedEventArgs e)//Удаление выделенного времени работы
@@ -728,10 +692,8 @@ namespace TVTK
             contentControlNews.Width = canvas.Width;
             contentControlNews.Height = canvas.Height;
 
-            //contentControlNews.Background = new SolidColorBrush(Colors.White);
-             contentControlNews.Background = new SolidColorBrush(Colors.Black);
-            //  ImageBrush imageBrush = new ImageBrush(new BitmapImage(new Uri(@".\TKS.png", UriKind.Relative)));
-            //   contentControlNews.Background = imageBrush;
+            contentControlNews.Background = new SolidColorBrush(Colors.Black);
+
             mediaElementNews = new MediaElement();
             mediaElementNews.LoadedBehavior = MediaState.Manual;
             mediaElementNews.UnloadedBehavior = MediaState.Manual;
@@ -742,7 +704,6 @@ namespace TVTK
             mediaElementNews.KeyDown += MediaElementNews_KeyDown;
             mediaElementNews.Stretch = Stretch.UniformToFill;
             
-          //  mediaElementNews.SpeedRatio = 0.80;
             contentControlNews.Children.Add(mediaElementNews);
             contentControlNews.Margin = new Thickness(canvas.Width/2, canvas.Height, -contentControlNews.Width, 0);
             canvas.Children.Add(contentControlNews);
@@ -750,10 +711,7 @@ namespace TVTK
             mediaElementNews.Visibility = Visibility.Visible;
             contentControlNews.Visibility = Visibility.Visible;
             contentControlNews.KeyDown += ContentControlNews_KeyDown;
-            canvas.KeyDown += Canvas_KeyDown;
-            //mediaElementNews.Clock.
-            //mediaElementNews.Focus();
-            
+            canvas.KeyDown += Canvas_KeyDown;           
         }
 
         private void ContentControlNews_KeyDown(object sender, KeyEventArgs e)//Надо определить какой из элементов будет реагировать на нажатие клавиш.
@@ -785,23 +743,16 @@ namespace TVTK
             {
                 thicknessAnimation.From = contentControlNews.Margin;
                 thicknessAnimation.To = mediaElement.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
-              //  showNews = true;
             }
             else
             {
                 thicknessAnimation.From = contentControlNews.Margin;
                 thicknessAnimation.To = new Thickness(mediaElement.Width/2, mediaElement.Height, 0, 0);
-              //  showNews = false;
             }
 
             thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
 
-            //if (mediaElementNews.CanPause)
-            //{
-            //    mediaElementNews.Pause();
-            //}
             contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
-         //   mediaElement.Play();
         }
 
         private void btnApplySetting_Click(object sender, RoutedEventArgs e)
@@ -909,13 +860,7 @@ namespace TVTK
 
             
         }
-
-        public enum TypeWork
-        {
-            Local,
-            Network,
-            Mixed
-        }
+   
 
         private void rbtypeWork_Checked(object sender, RoutedEventArgs e)
         {
