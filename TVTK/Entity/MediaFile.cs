@@ -35,12 +35,15 @@ namespace TVTK.Entity
         /// </summary>
         public bool Exsist { get; set; }
 
+        private NLog.Logger Logger { get; }
+
         /// <summary>
         /// Создание нового объекта файла
         /// </summary>
         /// <param name="_PathToFile"></param>
         public MediaFile(Uri _PathToFile)
-        {          
+        {
+            Logger = MainWindow.Logger;
             if (File.Exists(_PathToFile.ToString()))
             {
                 using (FileStream file = File.OpenRead(_PathToFile.ToString()))
@@ -55,7 +58,7 @@ namespace TVTK.Entity
             }
             else
             {
-                throw new FileNotFoundException($"Файл по пути {0} не существует", _PathToFile.ToString());
+                Logger.Warn($"Файл по пути {0} не существует", _PathToFile.ToString());
             }
         }
 

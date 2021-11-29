@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,25 +13,17 @@ namespace TVTK.Playlist
     public class PlayList
     {
         /// <summary>
-        /// Список всех доступных файлов
+        /// Списоки доступных файлов рекламного, новостного и тп контента.
         /// </summary>
-        public FileList FileList { get; set; }
+        ObservableCollection<PlayListByTypeContent> FileList { get; set; }
         /// <summary>
-        /// Порядок воспроизведения, зависимый от ключа TypePlaying.
+        /// Включен ли плейлист
         /// </summary>
-        public Dictionary<uint, uint> List { get; private set; }
+        public bool EnablePlylist { get; private set; }
         /// <summary>
-        /// 
+        /// Активен ли сейчс плейлист
         /// </summary>
-        public uint CurrentIndexMediaFile { get; private set; } // Индекс текущего проигрываемого файла
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool EnablePlylist { get; private set; } // Включен ли плейлист
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool ActivePlylist { get; private set; } //Активен ли сейчс плейлист
+        public bool ActivePlylist { get; private set; }
         /// <summary>
         /// Отображаемое имя плейлиста
         /// </summary>
@@ -39,14 +32,37 @@ namespace TVTK.Playlist
         /// Уникальный идентификатор плейлиста
         /// </summary>
         public uint IdPlalist { get; set; }
-
+        /// <summary>
+        /// Дни недели проигрывания плейлиста
+        /// </summary>
+        /// <param name="Name"></param>
+        public Enums.DayOfWeek dayOfWeek { get; set; }
+        /// <summary>
+        /// Приоритет плейлиста
+        /// </summary>
+        /// <param name="Name"></param>
+        public uint Priotity { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public PlayListByTypeContent CurrentFileList { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ObservableCollection<Dates> Days { get; set; }
         public PlayList(string Name)
         {
             NamePlalist = Name;
         }
 
-     
-        public void NewPlaylist(List<Uri> uris) { }
+      //  playList = GetContentLocal(Properties.Settings.Default.LocalPathAdv, lvFiles);
+      //  playListNews = GetContentLocal(Properties.Settings.Default.LocalPathNews, lvNews);
+
+
+        public void NewPlaylist(List<Uri> uris) 
+        {
+
+        }
      
         public void NewPlaylist(List<FileInfo> fileInfos) { }
       
@@ -81,18 +97,4 @@ namespace TVTK.Playlist
         public uint NextIndex() { CurrentIndexMediaFile = ++CurrentIndexMediaFile; return CurrentIndexMediaFile;  }
 
     }
-
-    public enum TypePlaying { Serially, Random }
-
-
-    public enum TypeContent
-    {
-        Adv,
-        News,
-        Photo,
-        Statistics,
-        Default
-    }
-
-    public enum DayOfWeek {Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday, All}
 }

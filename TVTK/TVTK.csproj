@@ -412,14 +412,18 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controller\AudioOutput.cs" />
+    <Compile Include="Controller\Scheduler.cs" />
+    <Compile Include="Entity\Dates.cs" />
+    <Compile Include="Entity\PlayListByTypeContent.cs" />
     <Compile Include="Enums\Enumirable.cs" />
+    <Compile Include="ObservableDictionary.cs" />
     <Compile Include="Playlist\FileList.cs" />
     <Compile Include="Entity\MediaFile.cs" />
     <Compile Include="Controller\Player.cs" />
     <Compile Include="Playlist\PlayList.cs" />
     <Compile Include="Controller\ScreenSaver\ScreenSaver.cs" />
     <Compile Include="Controller\Settings.cs" />
-    <Compile Include="Entity\Time.cs" />
+    <Compile Include="Entity\TimeOfPlaying.cs" />
     <Compile Include="Controller\TV.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

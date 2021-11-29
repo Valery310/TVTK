@@ -10,6 +10,7 @@ using TVTK.Entity;
 using TVTK.Enums;
 using NLog;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace TVTK.Playlist
 {
@@ -22,13 +23,15 @@ namespace TVTK.Playlist
         /// <summary>
         /// Список полученных из дректории файлов
         /// </summary>
-        public List<MediaFile> MediaFiles { get; private set; }
+        public ObservableCollection<MediaFile> MediaFiles { get; private set; }
         /// <summary>
         /// Таймер обновления списка файлов из директории
         /// </summary>
-        DispatcherTimer TimerRefresh;
+        private DispatcherTimer TimerRefresh;
+        /// <summary>
+        /// Логгер
+        /// </summary>
         public static readonly NLog.Logger Logger = MainWindow.Logger;
-
         /// <summary>
         /// Получение файла по id из списка
         /// </summary>
@@ -39,18 +42,24 @@ namespace TVTK.Playlist
             get => GetElementById(id);
         }
 
+        /// <summary>
+        /// Конструктор, инициализирующий список файлов и запускающий таймер обнвления файлов раз в 5 минут.
+        /// </summary>
         public FileList()
         {
             Logger.Trace("Создается список файлов");
+            GetContentLocal();
+            Logger.Trace("Создается таймер");
             TimerRefresh = new DispatcherTimer();
-            TimerRefresh
-                .Interval = new TimeSpan(0, 1, 0);
+            TimerRefresh.Interval = new TimeSpan(0, 5, 0);
+            TimerRefresh.Tick += RefreshAllFilesAsync;
+            TimerRefresh.Start();   
         }
 
         /// <summary>
         /// Проверка существования файла в списке и в директории и запись результата в объект файла.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Идентификатор файла в списке</param>
         /// <returns></returns>
         private MediaFile GetElementById(uint id) 
         {
@@ -87,14 +96,15 @@ namespace TVTK.Playlist
             }          
         }
 
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="lvPlaylist"></param>
-        private async void RefreshAllFilesAsync(ListView lvPlaylist) 
+        /// <summary>
+        /// Метод обновления списка файлов во время работы программы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void RefreshAllFilesAsync(object sender, EventArgs e) 
         {
             Logger.Trace("Начато обновление списка файлов");
-            await Task.Run(() => { GetContentLocal(lvPlaylist); });
+            await Task.Run(() => { GetContentLocal(); });
             Logger.Trace("Обновление успешно завершено");
         }
 
@@ -104,10 +114,10 @@ namespace TVTK.Playlist
         /// <param name="path"></param>
         /// <param name="lvPlaylist"></param>
         /// <returns></returns>
-        public void GetContentLocal(ListView lvPlaylist) //
+        public void GetContentLocal() //
         {
             Logger.Trace("Начат поиск файлов");
-            var temp = new List<MediaFile>();
+            var temp = new ObservableCollection<MediaFile>();
             _Directory = Directory.Exists(_Directory) ? _Directory : Directory.GetCurrentDirectory();
             DirectoryInfo directoryInfo = new DirectoryInfo(_Directory);
 
@@ -129,10 +139,7 @@ namespace TVTK.Playlist
             temp = GetAllFilesInDirectories(temp, directoryInfo, allowedExtensions);
 
             try
-            {
-                lvPlaylist.ItemsSource = null;
-                lvPlaylist.Items.Clear();
-                lvPlaylist.ItemsSource = temp;
+            {               
                 MediaFiles = temp;
             }
             catch (Exception ex)
@@ -146,11 +153,11 @@ namespace TVTK.Playlist
         /// <summary>
         /// Рекурсивно проходит по всем вложенным каталогам и добавляет в список файлы с поддерживаемым расширением.
         /// </summary>
-        /// <param name="temp"></param>
-        /// <param name="directoryInfo"></param>
-        /// <param name="allowedExtensions"></param>
+        /// <param name="temp">Список найденных файлов</param>
+        /// <param name="directoryInfo">Текущая директория</param>
+        /// <param name="allowedExtensions">Список поддерживаемых расширений</param>
         /// <returns></returns>
-        private List<MediaFile> GetAllFilesInDirectories(List<MediaFile> temp, DirectoryInfo directoryInfo, List<string> allowedExtensions) 
+        private ObservableCollection<MediaFile> GetAllFilesInDirectories(ObservableCollection<MediaFile> temp, DirectoryInfo directoryInfo, List<string> allowedExtensions) 
         {
             Logger.Error($"Начат поиск в {directoryInfo.FullName}");
             foreach (var item in directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Where(file => allowedExtensions.Any(file.Extension.ToLower().EndsWith)))

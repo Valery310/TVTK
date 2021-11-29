@@ -42,4 +42,28 @@
         Network,
         Mixed
     }
+
+    public enum TypeContent
+    {
+        Adv,
+        News,
+        Photo,
+        Statistics,
+        Default
+    }
+
+    public enum DayOfWeek 
+    { 
+        Monday, 
+        Tuesday, 
+        Wednesday, 
+        Thursday, 
+        Friday, 
+        Saturday, 
+        Sunday, 
+        All,
+        Weekdays,
+        Weekends
+
+    }
 }
