@@ -4,7 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:local="clr-namespace:TVTK"
+        xmlns:local="clr-namespace:TVTK" xmlns:viewmodel="clr-namespace:TVTK.ViewModel"
         mc:Ignorable="d"
         Title="ТВ ТКС" Height="536.4" Width="1338.2">
     <!-- <Window.Resources>
@@ -23,6 +23,7 @@
         </ListView>
         <TextBlock HorizontalAlignment="Left" Margin="10,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Добавить период работы" Height="16"/>
         <TextBox x:Name="tbxBreakFrom" HorizontalAlignment="Left" Height="22" Margin="79,251,0,0" TextWrapping="Wrap" Text="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay,  StringFormat='HH:mm'}" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakFrom_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+        <viewmodel:TimeControl Margin="245,325,1034.4,101.6"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,258,0,0" TextWrapping="Wrap" Text="От" VerticalAlignment="Top" Height="15"/>
         <TextBox x:Name="tbxBreakBefore" HorizontalAlignment="Left" Height="24" Margin="79,271,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakBefore_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
         <TextBlock HorizontalAlignment="Left" Margin="9,279,0,0" TextWrapping="Wrap" Text="До" VerticalAlignment="Top" Height="16"/>
