@@ -22,13 +22,13 @@ namespace TVTK.Controller
         /// <summary>
         /// Таймер проверки времени на старт и остановку проигрывания контента
         /// </summary>
-        static DispatcherTimer CheckTimer { get; set; }
+        private static DispatcherTimer CheckTimer { get; set; }
         /// <summary>
         /// Таймер планировщика на создание задания на слледующий день
         /// </summary>
-        static DispatcherTimer UpdateSchedulerTimer { get; set; }
+        private static DispatcherTimer UpdateSchedulerTimer { get; set; }
 
-        static NLog.Logger Logger {get;set;}
+        private static NLog.Logger Logger {get;set;}
 
         public delegate void Start(List<PlayList> playLists);
         /// <summary>
@@ -202,6 +202,24 @@ namespace TVTK.Controller
 
                 Logger.Info("Устарешие задачи удалены");
             }  
+        }
+
+        /// <summary>
+        /// Метод ручной остановки проигрывания и проверки времени
+        /// </summary>
+        public static void StopSheduler() 
+        {
+            CheckTimer.Stop();
+            StopPlaying();
+        }
+
+        /// <summary>
+        /// Метод старта проверки времени и автозапуска проигрывателя
+        /// </summary>
+        public static void StartScheduler() 
+        {
+            CheckTime(null, null);
+            CheckTimer.Start();
         }
     }
 }

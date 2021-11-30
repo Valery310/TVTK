@@ -39,9 +39,9 @@ namespace TVTK.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<TV> TVs {
+        public global::System.Collections.Generic.List<TVWol> TVs {
             get {
-                return ((global::System.Collections.Generic.List<TV>)(this["TVs"]));
+                return ((global::System.Collections.Generic.List<TVWol>)(this["TVs"]));
             }
             set {
                 this["TVs"] = value;

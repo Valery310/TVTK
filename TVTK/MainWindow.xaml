@@ -4,7 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:local="clr-namespace:TVTK" xmlns:viewmodel="clr-namespace:TVTK.ViewModel"
+        xmlns:local="clr-namespace:TVTK" xmlns:viewmodel="clr-namespace:TVTK.ViewModel" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:wpf="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
         mc:Ignorable="d"
         Title="ТВ ТКС" Height="536.4" Width="1338.2">
     <!-- <Window.Resources>
@@ -12,106 +12,115 @@
         </local:TimesViewModel>
     </Window.Resources>
 -->
-    <Grid Margin="0,0,-6.4,6.4">
-        <Button x:Name="Start" Content="Начать" HorizontalAlignment="Left" Margin="11,415,0,0" VerticalAlignment="Top" Width="85" Height="34" Click="ButtonStart_Click"/>
-        <ListView x:Name="lvFiles" HorizontalAlignment="Left" Height="202" Margin="815,34,0,0" VerticalAlignment="Top" Width="475">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <TextBlock HorizontalAlignment="Left" Margin="10,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Добавить период работы" Height="16"/>
-        <TextBox x:Name="tbxBreakFrom" HorizontalAlignment="Left" Height="22" Margin="79,251,0,0" TextWrapping="Wrap" Text="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay,  StringFormat='HH:mm'}" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakFrom_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <viewmodel:TimeControl Margin="245,325,1034.4,101.6"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,258,0,0" TextWrapping="Wrap" Text="От" VerticalAlignment="Top" Height="15"/>
-        <TextBox x:Name="tbxBreakBefore" HorizontalAlignment="Left" Height="24" Margin="79,271,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakBefore_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <TextBlock HorizontalAlignment="Left" Margin="9,279,0,0" TextWrapping="Wrap" Text="До" VerticalAlignment="Top" Height="16"/>
-        <Button x:Name="StartWithoutTimer" Content="Начать без таймера" HorizontalAlignment="Left" Margin="101,415,0,0" VerticalAlignment="Top" Width="124" Height="34" Click="ButtonWithoutTimer_Click"/>
-        <DataGrid x:Name="dgTime" HorizontalAlignment="Left" Height="96" Margin="11,315,0,0" VerticalAlignment="Top" Width="214" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Single" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding From, StringFormat=hh:mm}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105" Header="От"/>
-                <DataGridTextColumn Binding="{Binding Before, StringFormat=hh:mm}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105"  Header="До"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <Button Content="Добавить" HorizontalAlignment="Left" Margin="215,252,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnAddTime_Click" Height="19"/>
-        <Button Content="Удалить" HorizontalAlignment="Left" Margin="215,277,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnDelTime_Click" Height="20"/>
-        <TextBlock HorizontalAlignment="Left" Margin="11,295,0,0" TextWrapping="Wrap" Text="Период работы" VerticalAlignment="Top" Height="16"/>
-        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="210" Margin="9,18,0,0" Stroke="Black" VerticalAlignment="Top" Width="773"/>
-        <Button x:Name="btnApplyResolution" Content="Применить" HorizontalAlignment="Left" Margin="695,201,0,0" VerticalAlignment="Top" Width="75" Click="btnApplySetting_Click"/>
-        <TextBlock x:Name="tblHeight" HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Высота" VerticalAlignment="Top"/>
-        <TextBlock x:Name="tblWidth" HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" Text="Ширина" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23" Margin="79,56,0,0" TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <TextBox x:Name="tbxWidth" HorizontalAlignment="Left" Height="23" Margin="79,28,0,0" TextWrapping="Wrap" Text="1920" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <Label Content="Настройки" HorizontalAlignment="Left" Margin="10,-5,0,0" VerticalAlignment="Top" Width="126" Height="27"/>
-        <RadioButton x:Name="rbMixed" Tag="2" GroupName="typeWork" Content="Смешанный режим работы" HorizontalAlignment="Left" Margin="13,123,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <RadioButton x:Name="rbLocal" Tag="0" GroupName="typeWork" Content="Локальный режим работы" HorizontalAlignment="Left" Margin="13,83,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <RadioButton x:Name="rbNetwork" Tag="1" GroupName="typeWork" Content="Сетевой режим работы" HorizontalAlignment="Left" Margin="13,103,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
-        <Label Content="Адрес серера" HorizontalAlignment="Left" Margin="6,173,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" Width="93"/>
-        <TextBox x:Name="tbxIPServer" HorizontalAlignment="Left" Height="23" Margin="91,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="156"/>
-        <Label Content="Имя этого клиента" HorizontalAlignment="Left" Margin="6,142,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxNameClient" HorizontalAlignment="Left" Height="23" Margin="119,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="152"/>
-        <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="258,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="58" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <Label Content=":" HorizontalAlignment="Left" Margin="247,166,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
-        <CheckBox x:Name="chkbxAutoplay" IsChecked="False" Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" MaxLines="1"  Height="23" Margin="286,105,0,0" Text="" VerticalAlignment="Top" Width="290" IsReadOnlyCaretVisible="True" IsReadOnly="True"/>
-        <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="286,144,0,0" Text="" VerticalAlignment="Top" Width="290" IsReadOnly="True"/>
-        <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="287,82,0,0" VerticalAlignment="Top"/>
-        <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left" Margin="288,122,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" Margin="576,105,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click"/>
-        <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left" Margin="576,144,0,0" VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
-        <CheckBox x:Name="chbNews" Content="Показывать новости" HorizontalAlignment="Left" Margin="119,201,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" Margin="506,170,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" Margin="506,197,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <Label Content="Частота показа новостей" HorizontalAlignment="Left" Margin="321,167,0,0" VerticalAlignment="Top"/>
-        <Label Content="мин." HorizontalAlignment="Left" Margin="558,194,0,0" VerticalAlignment="Top"/>
-        <Label Content="мин." HorizontalAlignment="Left" Margin="558,167,0,0" VerticalAlignment="Top"/>
-        <Label Content="Длительность показа новостей" HorizontalAlignment="Left" Margin="321,194,0,0" VerticalAlignment="Top"/>
-        <!--  <ComboBox Name="cmbbxAudioOutput" HorizontalAlignment="Left" Margin="615,49,0,0" VerticalAlignment="Top" Width="155" Height="130"/>
+    <TabControl>
+        <TabItem Name="TabMain" Header="Главная">
+            <Grid Margin="0,0,-6.4,6.4">
+                <Button x:Name="Start" Content="Начать" HorizontalAlignment="Left" Margin="11,415,0,0" VerticalAlignment="Top" Width="85" Height="34" Click="ButtonStart_Click"/>
+                <ListView x:Name="lvFiles" HorizontalAlignment="Left" Height="202" Margin="815,34,0,0" VerticalAlignment="Top" Width="475">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <TextBlock HorizontalAlignment="Left" Margin="10,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Добавить период работы" Height="16"/>
+                <TextBox x:Name="tbxBreakFrom" HorizontalAlignment="Left" Height="22" Margin="79,251,0,0" TextWrapping="Wrap" Text="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay,  StringFormat='HH:mm'}" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakFrom_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <xctk:TimePicker Margin="177,419,1034.4,49.6"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,258,0,0" TextWrapping="Wrap" Text="От" VerticalAlignment="Top" Height="15"/>
+                <TextBox x:Name="tbxBreakBefore" HorizontalAlignment="Left" Height="24" Margin="79,271,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top" Width="120" TextChanged="tbxBreakBefore_TextChanged" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <TextBlock HorizontalAlignment="Left" Margin="9,279,0,0" TextWrapping="Wrap" Text="До" VerticalAlignment="Top" Height="16"/>
+                <DataGrid x:Name="dgTime" HorizontalAlignment="Left" Height="96" Margin="11,315,0,0" VerticalAlignment="Top" Width="214" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Single" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding From, StringFormat=hh:mm}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105" Header="От"/>
+                        <DataGridTextColumn Binding="{Binding Before, StringFormat=hh:mm}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105"  Header="До"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Button Content="Добавить" HorizontalAlignment="Left" Margin="215,252,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnAddTime_Click" Height="19"/>
+                <Button Content="Удалить" HorizontalAlignment="Left" Margin="215,277,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.48,1.25" Click="btnDelTime_Click" Height="20"/>
+                <TextBlock HorizontalAlignment="Left" Margin="11,295,0,0" TextWrapping="Wrap" Text="Период работы" VerticalAlignment="Top" Height="16"/>
+                <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="210" Margin="9,18,0,0" Stroke="Black" VerticalAlignment="Top" Width="773"/>
+                <Button x:Name="btnApplyResolution" Content="Применить" HorizontalAlignment="Left" Margin="695,201,0,0" VerticalAlignment="Top" Width="75" Click="btnApplySetting_Click"/>
+                <TextBlock x:Name="tblHeight" HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Высота" VerticalAlignment="Top"/>
+                <TextBlock x:Name="tblWidth" HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" Text="Ширина" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23" Margin="79,56,0,0" TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <TextBox x:Name="tbxWidth" HorizontalAlignment="Left" Height="23" Margin="79,28,0,0" TextWrapping="Wrap" Text="1920" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.625,-0.87" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <Label Content="Настройки" HorizontalAlignment="Left" Margin="10,-5,0,0" VerticalAlignment="Top" Width="126" Height="27"/>
+                <RadioButton x:Name="rbMixed" Tag="2" GroupName="typeWork" Content="Смешанный режим работы" HorizontalAlignment="Left" Margin="13,123,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+                <RadioButton x:Name="rbLocal" Tag="0" GroupName="typeWork" Content="Локальный режим работы" HorizontalAlignment="Left" Margin="13,83,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+                <RadioButton x:Name="rbNetwork" Tag="1" GroupName="typeWork" Content="Сетевой режим работы" HorizontalAlignment="Left" Margin="13,103,0,0" VerticalAlignment="Top" Checked="rbtypeWork_Checked"/>
+                <Label Content="Адрес серера" HorizontalAlignment="Left" Margin="6,173,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" Width="93"/>
+                <TextBox x:Name="tbxIPServer" HorizontalAlignment="Left" Height="23" Margin="91,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="156"/>
+                <Label Content="Имя этого клиента" HorizontalAlignment="Left" Margin="6,142,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxNameClient" HorizontalAlignment="Left" Height="23" Margin="119,144,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="152"/>
+                <TextBox x:Name="tbxIPServer_Port" HorizontalAlignment="Left" Height="23" Margin="258,173,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="58" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <Label Content=":" HorizontalAlignment="Left" Margin="247,166,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.485,1.538" FontSize="20" Height="33" Cursor="None" FontWeight="Bold"/>
+                <CheckBox x:Name="chkbxAutoplay" IsChecked="False" Content="Автозапуск" HorizontalAlignment="Left" Margin="13,201,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" MaxLines="1"  Height="23" Margin="286,105,0,0" Text="" VerticalAlignment="Top" Width="290" IsReadOnlyCaretVisible="True" IsReadOnly="True"/>
+                <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23" Margin="286,144,0,0" Text="" VerticalAlignment="Top" Width="290" IsReadOnly="True"/>
+                <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" Margin="287,82,0,0" VerticalAlignment="Top"/>
+                <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left" Margin="288,122,0,0" VerticalAlignment="Top"/>
+                <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" Margin="576,105,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click"/>
+                <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left" Margin="576,144,0,0" VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
+                <CheckBox x:Name="chbNews" Content="Показывать новости" HorizontalAlignment="Left" Margin="119,201,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" Margin="506,170,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" Margin="506,197,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <Label Content="Частота показа новостей" HorizontalAlignment="Left" Margin="321,167,0,0" VerticalAlignment="Top"/>
+                <Label Content="мин." HorizontalAlignment="Left" Margin="558,194,0,0" VerticalAlignment="Top"/>
+                <Label Content="мин." HorizontalAlignment="Left" Margin="558,167,0,0" VerticalAlignment="Top"/>
+                <Label Content="Длительность показа новостей" HorizontalAlignment="Left" Margin="321,194,0,0" VerticalAlignment="Top"/>
+                <!--  <ComboBox Name="cmbbxAudioOutput" HorizontalAlignment="Left" Margin="615,49,0,0" VerticalAlignment="Top" Width="155" Height="130"/>
         
         <Label Content="Вывод аудио" HorizontalAlignment="Left" Margin="616,27,0,0" VerticalAlignment="Top"/>
       -->
-        <TextBox x:Name="tbxPositionX" HorizontalAlignment="Left" Height="23" Margin="346,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <TextBox x:Name="tbxPositionY" HorizontalAlignment="Left" Height="23" Margin="347,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput"/>
-        <Label Content="Расположение окна" HorizontalAlignment="Left" Margin="286,14,0,0" VerticalAlignment="Top"/>
-        <Label Content="По оси X" HorizontalAlignment="Left" Margin="286,37,0,0" VerticalAlignment="Top"/>
-        <Label Content="По оси Y" HorizontalAlignment="Left" Margin="286,63,0,0" VerticalAlignment="Top"/>
-        <ListView x:Name="lvNews" HorizontalAlignment="Left" Height="218" Margin="815,258,0,0" VerticalAlignment="Top" Width="475">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <DataGrid x:Name="dgTV" HorizontalAlignment="Left" Height="110" Margin="321,315,0,0" VerticalAlignment="Top" Width="461" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Extended" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Name}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="55" Header="Имя"/>
-                <DataGridTextColumn Binding="{Binding Description}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="145" Header="Описание"/>
-                <DataGridTextColumn Binding="{Binding IP, StringFormat=xxx.xxx.xxx.xxx}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="65"  Header="IP"/>
-                <DataGridTextColumn Binding="{Binding Mac, StringFormat=xx:xx:xx:xx:xx:xx}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="145"  Header="Mac"/>
-                <DataGridTextColumn Binding="{Binding Status}" x:Name="dgtcStatus" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="45"  Header="Status"></DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-        <Label Content="Рекламный плейлист" HorizontalAlignment="Left" Margin="826,7,0,0" VerticalAlignment="Top"/>
-        <Label Content="Новостной плейлист" HorizontalAlignment="Left" Margin="821,236,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxPositionX" HorizontalAlignment="Left" Height="23" Margin="346,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <TextBox x:Name="tbxPositionY" HorizontalAlignment="Left" Height="23" Margin="347,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                <Label Content="Расположение окна" HorizontalAlignment="Left" Margin="286,14,0,0" VerticalAlignment="Top"/>
+                <Label Content="По оси X" HorizontalAlignment="Left" Margin="286,37,0,0" VerticalAlignment="Top"/>
+                <Label Content="По оси Y" HorizontalAlignment="Left" Margin="286,63,0,0" VerticalAlignment="Top"/>
+                <ListView x:Name="lvNews" HorizontalAlignment="Left" Height="218" Margin="815,258,0,0" VerticalAlignment="Top" Width="475">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <DataGrid x:Name="dgTV" HorizontalAlignment="Left" Height="110" Margin="321,315,0,0" VerticalAlignment="Top" Width="461" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Extended" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Name}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="55" Header="Имя"/>
+                        <DataGridTextColumn Binding="{Binding Description}" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="145" Header="Описание"/>
+                        <DataGridTextColumn Binding="{Binding IP, StringFormat=xxx.xxx.xxx.xxx}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="65"  Header="IP"/>
+                        <DataGridTextColumn Binding="{Binding Mac, StringFormat=xx:xx:xx:xx:xx:xx}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="145"  Header="Mac"/>
+                        <DataGridTextColumn Binding="{Binding Status}" x:Name="dgtcStatus" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="45"  Header="Status"></DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Label Content="Рекламный плейлист" HorizontalAlignment="Left" Margin="826,7,0,0" VerticalAlignment="Top"/>
+                <Label Content="Новостной плейлист" HorizontalAlignment="Left" Margin="821,236,0,0" VerticalAlignment="Top"/>
 
-        <Button x:Name="btnWOLTV" Content="Разбудить" HorizontalAlignment="Left" Margin="685,430,0,0" VerticalAlignment="Top" Width="95" Height="29" Click="btnWOLTV_Click"/>
-        <Button x:Name="btnDelTV" Content="Удалить" HorizontalAlignment="Left" Margin="705,280,0,0" VerticalAlignment="Top" Width="75" Click="btnDelTV_Click"/>
-        <Button x:Name="btnAddTV" Content="Добавить" HorizontalAlignment="Left" Margin="705,243,0,0" VerticalAlignment="Top" Width="75" Click="btnAddTV_Click"/>
-        <Label Content="Имя" HorizontalAlignment="Left" Margin="321,241,0,0" VerticalAlignment="Top"/>
-        <Label Content="Описание" HorizontalAlignment="Left" Margin="463,279,0,0" VerticalAlignment="Top"/>
-        <Label Content="Mac" HorizontalAlignment="Left" Margin="463,241,0,0" VerticalAlignment="Top"/>
-        <Label Content="IP" HorizontalAlignment="Left" Margin="321,279,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbxNameTV" HorizontalAlignment="Left" Height="23" Margin="360,238,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="98"/>
-        <TextBox x:Name="tbxIPTV" HorizontalAlignment="Left" Height="23" Margin="360,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="98" TextChanged="tbxIPTV_TextChanged" PreviewTextInput="tbxIPTV_PreviewTextInput"/>
-        <TextBox x:Name="tbxMACTV" HorizontalAlignment="Left" Height="23" Margin="532,243,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="148" TextChanged="tbxMACTV_TextChanged" PreviewTextInput="tbxMACTV_PreviewTextInput"/>
-        <TextBox x:Name="tbxDescTV" HorizontalAlignment="Left" Height="23" Margin="532,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="148"/>
-        <TextBox x:Name="tbxTitlePlayer" HorizontalAlignment="Left" Height="23" Margin="577,39,0,0" TextWrapping="Wrap" Text="Player" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Имя плеера" HorizontalAlignment="Left" Margin="494,36,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnCheckStatus" Content="Проверить доступность" HorizontalAlignment="Left" Margin="532,430,0,0" VerticalAlignment="Top" Width="140" Height="29" Click="btnCheckStatus_Click"/>
-        <Button x:Name="btnSelectedWOLTV" Content="Разбудить выбранные" HorizontalAlignment="Left" Margin="385,430,0,0" VerticalAlignment="Top" Width="134" Height="29" Click="Button_Click"/>
-        <Label Content="Частота показа" HorizontalAlignment="Left" Margin="624,105,0,0" VerticalAlignment="Top" Width="99"/>
-        <CheckBox x:Name="chbScreenSaver" IsChecked="False" Content="Хранитель экрана" HorizontalAlignment="Left" Margin="627,76,0,0" VerticalAlignment="Top" Width="143"/>
-        <TextBox x:Name="tbxDurationScreenSaver" HorizontalAlignment="Left" Height="23" Margin="728,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="42"/>
-    </Grid>
+                <Button x:Name="btnWOLTV" Content="Разбудить" HorizontalAlignment="Left" Margin="685,430,0,0" VerticalAlignment="Top" Width="95" Height="29" Click="btnWOLTV_Click"/>
+                <Button x:Name="btnDelTV" Content="Удалить" HorizontalAlignment="Left" Margin="705,280,0,0" VerticalAlignment="Top" Width="75" Click="btnDelTV_Click"/>
+                <Button x:Name="btnAddTV" Content="Добавить" HorizontalAlignment="Left" Margin="705,243,0,0" VerticalAlignment="Top" Width="75" Click="btnAddTV_Click"/>
+                <Label Content="Имя" HorizontalAlignment="Left" Margin="321,241,0,0" VerticalAlignment="Top"/>
+                <Label Content="Описание" HorizontalAlignment="Left" Margin="463,279,0,0" VerticalAlignment="Top"/>
+                <Label Content="Mac" HorizontalAlignment="Left" Margin="463,241,0,0" VerticalAlignment="Top"/>
+                <Label Content="IP" HorizontalAlignment="Left" Margin="321,279,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbxNameTV" HorizontalAlignment="Left" Height="23" Margin="360,238,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="98"/>
+                <TextBox x:Name="tbxIPTV" HorizontalAlignment="Left" Height="23" Margin="360,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="98" TextChanged="tbxIPTV_TextChanged" PreviewTextInput="tbxIPTV_PreviewTextInput"/>
+                <TextBox x:Name="tbxMACTV" HorizontalAlignment="Left" Height="23" Margin="532,243,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="148" TextChanged="tbxMACTV_TextChanged" PreviewTextInput="tbxMACTV_PreviewTextInput"/>
+                <TextBox x:Name="tbxDescTV" HorizontalAlignment="Left" Height="23" Margin="532,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="148"/>
+                <TextBox x:Name="tbxTitlePlayer" HorizontalAlignment="Left" Height="23" Margin="577,39,0,0" TextWrapping="Wrap" Text="Player" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Имя плеера" HorizontalAlignment="Left" Margin="494,36,0,0" VerticalAlignment="Top"/>
+                <Button x:Name="btnCheckStatus" Content="Проверить доступность" HorizontalAlignment="Left" Margin="532,430,0,0" VerticalAlignment="Top" Width="140" Height="29" Click="btnCheckStatus_Click"/>
+                <Button x:Name="btnSelectedWOLTV" Content="Разбудить выбранные" HorizontalAlignment="Left" Margin="385,430,0,0" VerticalAlignment="Top" Width="134" Height="29" Click="Button_Click"/>
+                <Label Content="Частота показа" HorizontalAlignment="Left" Margin="624,105,0,0" VerticalAlignment="Top" Width="99"/>
+                <CheckBox x:Name="chbScreenSaver" IsChecked="False" Content="Хранитель экрана" HorizontalAlignment="Left" Margin="627,76,0,0" VerticalAlignment="Top" Width="143"/>
+                <TextBox x:Name="tbxDurationScreenSaver" HorizontalAlignment="Left" Height="23" Margin="728,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="42"/>
+            </Grid>
+        </TabItem>
+        <TabItem Name="TabPlaylist" Header="Плейлисты">
+            <wpf:VideoView x:Name="_VLCPlayer" Height="200" Width="200"></wpf:VideoView>
+            
+        </TabItem>
+        <TabItem Name="TabSettings" Header="Настройки"></TabItem>
+    </TabControl>
+   
 </Window>
