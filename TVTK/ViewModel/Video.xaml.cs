@@ -26,7 +26,7 @@ namespace TVTK.ViewModel
     {
         DispatcherTimer timerDurationShowNews;//таймер времени показа одной новости.
         bool playing = false; // маркер, позволяющий определить текущее состояние проигрывателя видео/рекламы
-        bool showNews = false; //маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
+        public bool showNews = false; //маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
         bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
         Video window;//окно проигрывателя рекламы/видео
 
@@ -83,7 +83,8 @@ namespace TVTK.ViewModel
 
             if (Properties.Settings.Default.News)
             {
-              //  CreateNewsWindow(VideoViewCanvas);
+                CreateNewsWindow();
+                
             }
             // window.WindowStyle = WindowStyle.None;
             //  window.ResizeMode = ResizeMode.NoResize;
@@ -101,18 +102,31 @@ namespace TVTK.ViewModel
         private void VideoViewAdv_Loaded(object sender, RoutedEventArgs e)
         {
             logger.Info("Плеер реклам загружен");
-            MessageBox.Show("Плеер реклам загружен");
-            this.mediaPlayerAdv = new MediaPlayer(this.libVLC);
-            this.mediaPlayerAdv.EnableKeyInput = true;
-            this.VideoViewAdv.Content = this.mediaPlayerAdv;
-            this.VideoViewAdv.MediaPlayer = this.mediaPlayerAdv;
+          //  MessageBox.Show("Плеер реклам загружен");
+
+            mediaPlayerAdv = new MediaPlayer(this.libVLC);
+            mediaPlayerAdv.EnableKeyInput = true;
+            mediaPlayerAdv.EnableHardwareDecoding = true;
+            
+            this.VideoViewAdv.Content = mediaPlayerAdv;
+            this.VideoViewAdv.MediaPlayer = mediaPlayerAdv;
+            window.VideoViewAdv.IsEnabled = true;  
         }
 
         private void VideoViewNews_Loaded(object sender, RoutedEventArgs e)
         {
             logger.Info("Плеер новостей загружен");
-            MessageBox.Show("Плеер новостей загружен");
-            VideoViewAdv.MediaPlayer = mediaPlayerNews;
+              MessageBox.Show("Плеер новостей загружен");
+
+            mediaPlayerNews = new MediaPlayer(this.libVLC);
+            mediaPlayerNews.EnableKeyInput = true;
+            mediaPlayerNews.EnableHardwareDecoding = true;
+            
+            mediaPlayerNews.Opening += MediaPlayer_Opening;
+            mediaPlayerNews.Stopped += mediaPlayerNews_MediaEnded;
+
+            this.VideoViewNews.Content = mediaPlayerNews;
+            this.VideoViewNews.MediaPlayer = mediaPlayerNews;
         }
 
         private void VideoView_Unloaded(object sender, RoutedEventArgs e)
@@ -130,23 +144,20 @@ namespace TVTK.ViewModel
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Start()
+        public async Task<bool> StartAdv()
         {
             try
             {
-                if (VideoViewAdv.IsLoaded)
+                // var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+                //  var media = new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
+                var media = new Media(libVLC, new Uri("C:\\Users\\valer\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\dr.jpg"));
+                if (window.VideoViewAdv.IsLoaded)
                 {
-                   // VideoViewAdv.MediaPlayer = mediaPlayerAdv;
-                    var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
-                    //var t = Player.GetNextMedia(libVLC);
-                    //  NewsPanel.Visibility = Visibility.Collapsed;
-                    //  await media.Parse();
-                    //   VideoViewAdv.MediaPlayer.Play(media);
-                    // this.mediaPlayerAdv.Play(media);
-                    this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
-                    // window.VideoViewAdv.MediaPlayer.Play(Player.GetNextMedia(libVLC));
+                   
+                    window.VideoViewAdv.MediaPlayer.Play(media);
+                    //this.VideoViewAdv.MediaPlayer.Play(new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")));
+                    //  this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
 
-                    //   mediaPlayerAdv.Play(new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
                     return true;
                 }
                 else
@@ -155,6 +166,40 @@ namespace TVTK.ViewModel
                     return false;
                 }
               
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> Start()
+        {
+           await StartAdv();
+           await StartNews();
+           return false;
+        }
+
+        public async Task<bool> StartNews()
+        {
+            try
+            {
+                // var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+                var media = new Media(libVLC, new Uri("C:\\Users\\valer\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+                if (window.VideoViewNews.IsLoaded)
+                {
+                    window.VideoViewNews.MediaPlayer.Play(media);
+                    //this.VideoViewAdv.MediaPlayer.Play(new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")));
+                    //  this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
+                    AnimationNews();
+                    return true;
+                }
+                else
+                {
+                    MessageBox.Show("Плеер еще не загрузился");
+                    return false;
+                }
+
             }
             catch (Exception)
             {
@@ -173,16 +218,16 @@ namespace TVTK.ViewModel
             bool isFullscreen = false;
             bool isPlaying = false;
             Size VideoSize;
-            Size FormSize0;
+            Size FormSize;
             Point VideoLocation;
 
-            window.VideoViewAdv.KeyDown += VideoView_KeyDown;
-            this.mediaPlayerAdv = new MediaPlayer(libVLC);
+          //  window.VideoViewAdv.KeyDown += VideoView_KeyDown;
+            //this.mediaPlayerAdv = new MediaPlayer(libVLC);
           //  window.VideoViewAdv.Loaded += VideoViewAdv_Loaded;
-            window.VideoViewAdv.Unloaded += VideoView_Unloaded;
-            window.VideoViewAdv.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
-            window.VideoViewAdv.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
-            window.VideoViewAdv.BorderThickness = new Thickness(10);
+          //  window.VideoViewAdv.Unloaded += VideoView_Unloaded;
+        //   window.VideoViewAdv.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+        //    window.VideoViewAdv.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
+        //    window.VideoViewAdv.BorderThickness = new Thickness(10);
 
             Size t = new Size(500d, 500d);
             //   VideoViewAdv.RenderSize.Width = t;
@@ -190,8 +235,8 @@ namespace TVTK.ViewModel
             //  this.VideoViewAdv.Style = Style.;
             
            
-            this.VideoViewAdv.Height = 600;
-            this.VideoViewAdv.Width = 600;
+            this.VideoViewAdv.Height = window.Height;
+            this.VideoViewAdv.Width = window.Width;
 
             //   (sender, e) => VideoViewAdv.MediaPlayer = mediaPlayerAdv;
             //using (var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4")))
@@ -202,21 +247,19 @@ namespace TVTK.ViewModel
 
 
             // Start(libVLC);
-
+           
         }
 
 
-        void CreateNewsWindow(Canvas canvas)//Создание окна новостей
+        void CreateNewsWindow()//Создание окна новостей
         {
-            this.mediaPlayerNews = new MediaPlayer(libVLC);
-            this.VideoViewNews.Loaded += (sender, e) => this.VideoViewNews.MediaPlayer = this.mediaPlayerNews;
+          //  window.VideoViewNews.Loaded += VideoViewNews_Loaded;
+         //   VideoViewNews.Unloaded += VideoView_Unloaded;
 
-            VideoViewNews.Unloaded += VideoView_Unloaded;
+            NewsPanel.Width = VideoViewCanvas.Width;
+            NewsPanel.Height = VideoViewCanvas.Height;
 
-            NewsPanel.Width = canvas.Width;
-            NewsPanel.Height = canvas.Height;
-
-            NewsPanel.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Black);
+            NewsPanel.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
 
             // mediaElementNews = new MediaElement();
 
@@ -230,21 +273,22 @@ namespace TVTK.ViewModel
 
             //  mediaPlayerNews.Opening.MediaOpened += mediaPlayerNews_MediaOpened;
             //  mediaPlayerNews.MediaEnded += mediaPlayerNews_MediaEnded;
-            mediaPlayerNews.Opening += MediaPlayer_Opening;
-            mediaPlayerNews.Stopped += mediaPlayerNews_MediaEnded;
-            VideoViewNews.KeyDown += VideoView_KeyDown;
+       
+
+         //   VideoViewNews.KeyDown += VideoView_KeyDown;
 
             // mediaPlayerNews.Stretch = Stretch.UniformToFill;
 
 
-            NewsPanel.Margin = new Thickness(canvas.Width / 2, canvas.Height, -NewsPanel.Width, 0);
+            NewsPanel.Margin = new Thickness(VideoViewCanvas.Width / 2, VideoViewCanvas.Height, -NewsPanel.Width, 0);
 
-            canvas.Children[1].Visibility = Visibility.Visible;
+            VideoViewCanvas.Children[1].Visibility = Visibility.Visible;
             VideoViewNews.Visibility = Visibility.Visible;
             NewsPanel.Visibility = Visibility.Visible;
 
-            NewsPanel.KeyDown += ContentControlNews_KeyDown;
-            canvas.KeyDown += Canvas_KeyDown;
+            // NewsPanel.KeyDown += ContentControlNews_KeyDown;
+            //  VideoViewCanvas.KeyDown += Canvas_KeyDown;
+            
         }
 
         
@@ -465,8 +509,9 @@ namespace TVTK.ViewModel
 
         public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
-            Canvas canvas = window.Content as Canvas;
-            StackPanel contentControlNews = canvas.Children[3] as StackPanel;
+          
+          //  Canvas canvas = window.Content as Canvas;
+          //  StackPanel contentControlNews = canvas.Children[3] as StackPanel;
             ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
             SineEase se = new SineEase();
             se.EasingMode = EasingMode.EaseInOut;
@@ -475,32 +520,32 @@ namespace TVTK.ViewModel
 
             if (showNews == true)//если истина, то выводим экран новостей
             {
-                thicknessAnimation.From = contentControlNews.Margin;
+                thicknessAnimation.From = NewsPanel.Margin;
                 thicknessAnimation.To = VideoViewAdv.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
             }
             else
             {
-                thicknessAnimation.From = contentControlNews.Margin;
+                thicknessAnimation.From = NewsPanel.Margin;
                 thicknessAnimation.To = new Thickness(VideoViewAdv.Width / 2, VideoViewAdv.Height, 0, 0);
             }
 
             thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
 
-            contentControlNews.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
+            NewsPanel.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
         }
 
         private void VideoView_KeyDown(object sender, KeyEventArgs e)
         {
-            var temp = sender as Video;
+            var temp = sender as VideoView;
             if (e.Key == Key.Escape)
             {
                 //(sender as Video).Stop();
                 libVLC.Dispose();
-                temp.mediaPlayerNews.Dispose();
-                temp.mediaPlayerAdv.Dispose();
-                temp.VideoViewAdv.Dispose();
-                temp.VideoViewNews.Dispose();
-                (sender as Video).Close();
+                //temp.mediaPlayerNews.Dispose();
+                //temp.mediaPlayerAdv.Dispose();
+                //temp.VideoViewAdv.Dispose();
+                //temp.VideoViewNews.Dispose();
+               // (sender as VideoView).Close();
             }
         }
 
@@ -528,6 +573,16 @@ namespace TVTK.ViewModel
                 logger.Warn($"Ошибка отчистки памяти плеера: {ex.ToString()}");
             }
            
+        }
+
+        private void VideoViewCanvas_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void NewsPanel_KeyDown(object sender, KeyEventArgs e)
+        {
+
         }
     }
 }

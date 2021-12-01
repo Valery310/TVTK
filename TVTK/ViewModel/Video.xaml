@@ -8,10 +8,10 @@
         xmlns:uc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
         mc:Ignorable="d"
         Height="450" Width="800" WindowStyle="None" ResizeMode="NoResize"  IsEnabled="False" KeyDown="window_KeyDown">
-    <Canvas x:Name="VideoViewCanvas">
-        <uc:VideoView x:Name="VideoViewAdv" Panel.ZIndex="2" KeyDown="VideoView_KeyDown" Loaded="VideoViewAdv_Loaded"></uc:VideoView>
-        <StackPanel x:Name="NewsPanel" >
-            <uc:VideoView x:Name="VideoViewNews" Panel.ZIndex="1" KeyDown="VideoView_KeyDown" Loaded="VideoViewAdv_Loaded" ></uc:VideoView>
+    <Canvas x:Name="VideoViewCanvas" KeyDown="VideoViewCanvas_KeyDown">
+        <uc:VideoView x:Name="VideoViewAdv" Panel.ZIndex="2" KeyDown="VideoView_KeyDown" Loaded="VideoViewAdv_Loaded" Unloaded="VideoView_Unloaded"></uc:VideoView>
+        <StackPanel x:Name="NewsPanel" KeyDown="NewsPanel_KeyDown" >
+            <uc:VideoView x:Name="VideoViewNews" Panel.ZIndex="1" KeyDown="VideoView_KeyDown" Loaded="VideoViewNews_Loaded" Unloaded="VideoView_Unloaded" ></uc:VideoView>
         </StackPanel>
     </Canvas>
 </Window>

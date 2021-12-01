@@ -142,7 +142,16 @@ namespace TVTK.Controller
 
         public static void StartNews(object sender, EventArgs e)
         {
-           
+            if (videoPlayer.showNews)
+            {
+                videoPlayer.AnimationNews();
+                videoPlayer.showNews = false;
+            }
+            else
+            {
+                videoPlayer.AnimationNews();
+                videoPlayer.showNews = true;
+            }
             //if (!showNews && CheckTime())
             //{
             //    timerStartNews.Stop();

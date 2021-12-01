@@ -121,6 +121,7 @@
                 <Button Width="150" Height="50" x:Name="CreateVLC" Click="CreateVLC_Click">CreateVLC</Button>
                 <Button Width="150" Height="50" x:Name="StartVLC" Click="StartVLC_Click">StartVLC</Button>
                 <Button Width="150" Height="50" x:Name="StopVLC" Click="StopVLC_Click">StopVLC</Button>
+                <Button Width="150" Height="50" x:Name="ShowNews" Click="ShowNews_Click">ShowNews</Button>
             </StackPanel>
         </TabItem>
         <TabItem Name="TabSettings" Header="Настройки"></TabItem>

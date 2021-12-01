@@ -284,5 +284,10 @@ namespace TVTK
         {
             Player.StartPlayer();
         }
+        private void ShowNews_Click(object sender, RoutedEventArgs e)
+        {
+            Player.StartNews(sender, new EventArgs());
+        }
+        
     }
 }
