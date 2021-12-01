@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using TVTK.Entity;
 using TVTK.Enums;
 using TVTK.Playlist;
+using TVTK.ViewModel;
 
 namespace TVTK.Controller
 {
@@ -24,7 +25,7 @@ namespace TVTK.Controller
         /// <summary>
         /// Показывать новостной контент один раз в указанный период. Например: каждые 20 минут.
         /// </summary>
-        public static int FrequencyShow { get; set; }      
+        public static int FrequencyShow { get; set; }
         /// <summary>
         /// Порядок проигрывания файлов в плелистах.
         /// </summary>
@@ -43,12 +44,16 @@ namespace TVTK.Controller
         static DispatcherTimer timerStartNews;//Таймер для запуска показа новостей.
         static DispatcherTimer timerEndNews;//Таймер для остановки показа новостей.
 
+        private static NLog.Logger logger {get;set;}
+
+        static Video videoPlayer { get; set; }
+
         static Player() 
         {
-          
 
-            Scheduler.StartPlaying += StartPlayer;
-            Scheduler.StopPlaying += StopPlayer;
+            logger = MainWindow.Logger;
+        //    Scheduler.StartPlaying += StartPlayer;
+         //   Scheduler.StopPlaying += StopPlayer;
 
             int seek = Environment.TickCount;
             random = new Random(seek);
@@ -78,6 +83,11 @@ namespace TVTK.Controller
 
         public static void StopPlayer() //Создание окна проигрывателя и его запуск.
         {
+            if (videoPlayer != null)
+            {
+                videoPlayer.Dispose();              
+            }
+            
             CurrentPlaylist = null;
         }
 
@@ -132,6 +142,7 @@ namespace TVTK.Controller
 
         public static void StartNews(object sender, EventArgs e)
         {
+           
             //if (!showNews && CheckTime())
             //{
             //    timerStartNews.Stop();
@@ -160,6 +171,8 @@ namespace TVTK.Controller
             //}
         }
 
+        public static void StartPlayer() { videoPlayer.Start(); }
+
         public static void StopNews(object sender, EventArgs e)
         {
             //if (showNews)
@@ -180,54 +193,49 @@ namespace TVTK.Controller
             //}
         }
 
-        public async static void CreatePlayer()
+        public static void ResumePlayer()
         {
-            LibVLCSharp.Shared.Core.Initialize();
 
-            VideoView _VLCPlayer = new VideoView();
+        }
 
-            Thickness thickness = new Thickness(0);
+
+        public static void PausePlayer()
+        {
+
+        }
+
+        public static Media GetNextMedia(LibVLC libVLC) 
+        {
+            //MediaFile file = CurrentPlaylist.NextMediaFile();
+            //if (file != null)
+            //{
+            //    if (file.Exsist)
+            //    {
+            //        return new Media(libVLC, file.PathToFile);
+            //    }
+            //    else
+            //    {
+            //        return GetNextMedia(libVLC);
+            //    }
+            //}
+            //else
+            //{
+            //    logger.Warn("Плейлист пуст");
+            //}
            
-            _VLCPlayer.Margin = thickness;
+            return new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+        }
 
-            bool isFullscreen = false;
-            bool isPlaying = false;
-            Size VideoSize;
-            Size FormSize;
-            Point VideoLocation;
+        public static void CreatePlayer()
+        {
+           // LibVLCSharp.Shared.Core.Initialize();
 
-            using (var libVLC = new LibVLC())
-            {
-               // _VLCPlayer = new VideoView();
-           //     _VLCPlayer.MediaPlayer.EnableHardwareDecoding = true;
-                _VLCPlayer.KeyDown += _VLCPlayer_KeyDown;
+            videoPlayer = new Video();
+          //  VideoView VideoViewAdv = videoPlayer.VideoViewAdv;
 
-                //var media = new Media(libVLC, "", FromType.FromPath);
-                var t = new UriBuilder( Assembly.GetExecutingAssembly().CodeBase);
-              //  string path = Path.GetDirectoryName();
-                var uri = new Uri(System.IO.Path.Combine(t.Path, "/Test/ДР.jpg"));
-                var media1 = new Media(libVLC, uri);
-                await media1.Parse(MediaParseOptions.ParseLocal);
-                var media2 = new Media(libVLC, new Uri(System.IO.Path.Combine( t.Path, "Test/Гигиена ТК Сосеогорский (002).mp4")));
-                await media2.Parse(MediaParseOptions.ParseLocal);
-                MediaList ml = new MediaList(media1);
-                ml.AddMedia(media1);
-                foreach (var item in ml)
-                {
-                    //  using (var mp = new MediaPlayer(media.SubItems.First()))
-                    using (var mp = new MediaPlayer(item))
-                    {
-                        mp.Opening += Mp_Opening;
-                        mp.MediaChanged += Mp_MediaChanged;
-                        mp.Stopped += Mp_Stopped;
-                        _VLCPlayer.MediaPlayer = mp;
-                        //      var r = mp.Play(new Media(libVLC, new Uri(""))); ;
-                        var r = mp.Play();
-                        //Console.ReadKey();
-                    }
-                }
             
-            }
+            
+        }
 
 
 
@@ -286,43 +294,7 @@ namespace TVTK.Controller
             //mediaElement.Stretch = Stretch.UniformToFill;
             //mediaElement.LoadedBehavior = MediaState.Manual;
             //mediaElement.UnloadedBehavior = MediaState.Manual;
-        }
-
-        private static void Mp_Stopped(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void Mp_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void _VLCPlayer_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void Mp_Opening(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        /// <summary>
-        /// Выполняется при открытии файла плеером.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
-        {
-        //    playing = true;
-        }
-
-       
-
-
-        
+               
         private static void Timer_Tick(object sender, EventArgs e)
         {
             //mediaElementNews.Close();

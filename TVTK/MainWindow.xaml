@@ -117,8 +117,11 @@
             </Grid>
         </TabItem>
         <TabItem Name="TabPlaylist" Header="Плейлисты">
-            <wpf:VideoView x:Name="_VLCPlayer" Height="200" Width="200"></wpf:VideoView>
-            
+            <StackPanel>
+                <Button Width="150" Height="50" x:Name="CreateVLC" Click="CreateVLC_Click">CreateVLC</Button>
+                <Button Width="150" Height="50" x:Name="StartVLC" Click="StartVLC_Click">StartVLC</Button>
+                <Button Width="150" Height="50" x:Name="StopVLC" Click="StopVLC_Click">StopVLC</Button>
+            </StackPanel>
         </TabItem>
         <TabItem Name="TabSettings" Header="Настройки"></TabItem>
     </TabControl>

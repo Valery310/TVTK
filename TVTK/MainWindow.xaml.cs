@@ -59,7 +59,7 @@ namespace TVTK
   
             InitializeComponent();
 
-            Player.CreatePlayer();
+         //   Player.CreatePlayer();
         }
 
         internal void ViewModelTV_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -268,6 +268,21 @@ namespace TVTK
                 ot.Add(item as TVWol);
             }
             TVWol.WOL(ot);
+        }
+
+        private void CreateVLC_Click(object sender, RoutedEventArgs e)
+        {
+            Player.CreatePlayer();
+        }
+
+        private void StopVLC_Click(object sender, RoutedEventArgs e)
+        {
+            Player.StopPlayer();
+        }
+
+        private void StartVLC_Click(object sender, RoutedEventArgs e)
+        {
+            Player.StartPlayer();
         }
     }
 }

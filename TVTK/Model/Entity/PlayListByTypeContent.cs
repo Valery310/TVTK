@@ -67,6 +67,11 @@ namespace TVTK.Entity
                 return FileList[List[_nextIndex]];
             }
             else
+            if (_nextIndex == List.Count)
+            {
+                CurrentIndexMediaFile = 0;
+                return Next();
+            }
             {
                 logger.Error("Запрошенный файл не существует, так как его индекс выходит за значение длины списка");
                 new ArgumentOutOfRangeException("Запрошенный файл не существует, так как его индекс выходит за значение длины списка");
@@ -106,14 +111,17 @@ namespace TVTK.Entity
             if (FileList != null)
             {
                 logger.Trace($"Передан файл: {FileList[List[CurrentIndexMediaFile]].NameOfFile}");
-                return FileList[List[CurrentIndexMediaFile]];
+                CurrentIndexMediaFile++;
+                return FileList[List[CurrentIndexMediaFile-1]];
             }
             else
             {
                 logger.Error("Запрошенный файл не существует, так как его индекс выходит за значение длины списка");
                 new ArgumentOutOfRangeException("Запрошенный файл не существует, так как его индекс выходит за значение длины списка");
                 return null;
-            }      
+            }
+
+
         }
 
         /// <summary>
