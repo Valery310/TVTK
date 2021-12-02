@@ -41,6 +41,7 @@ namespace TVTK.ViewModel
 
         public LibVLC libVLC { get; set; }
 
+        private Storyboard storyboard { get; set; }
         //public static Random GetThreadRandom()
         //{
         //    return random;
@@ -116,7 +117,7 @@ namespace TVTK.ViewModel
         private void VideoViewNews_Loaded(object sender, RoutedEventArgs e)
         {
             logger.Info("Плеер новостей загружен");
-              MessageBox.Show("Плеер новостей загружен");
+         //     MessageBox.Show("Плеер новостей загружен");
 
             mediaPlayerNews = new MediaPlayer(this.libVLC);
             mediaPlayerNews.EnableKeyInput = true;
@@ -507,31 +508,75 @@ namespace TVTK.ViewModel
             throw new NotImplementedException();
         }
 
-        public void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
+        public async void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
+
+            
           
-          //  Canvas canvas = window.Content as Canvas;
-          //  StackPanel contentControlNews = canvas.Children[3] as StackPanel;
-            ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
-            SineEase se = new SineEase();
-            se.EasingMode = EasingMode.EaseInOut;
-            thicknessAnimation.EasingFunction = se;
-            thicknessAnimation.DecelerationRatio = 0.5;
+                //  Canvas canvas = window.Content as Canvas;
+                //  StackPanel contentControlNews = canvas.Children[3] as StackPanel;
+                ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
+                SineEase se = new SineEase();
+                se.EasingMode = EasingMode.EaseInOut;
+                thicknessAnimation.EasingFunction = se;
+                thicknessAnimation.DecelerationRatio = 0.5;
 
-            if (showNews == true)//если истина, то выводим экран новостей
-            {
-                thicknessAnimation.From = NewsPanel.Margin;
-                thicknessAnimation.To = VideoViewAdv.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
-            }
-            else
-            {
-                thicknessAnimation.From = NewsPanel.Margin;
-                thicknessAnimation.To = new Thickness(VideoViewAdv.Width / 2, VideoViewAdv.Height, 0, 0);
-            }
+                if (showNews == true)//если истина, то выводим экран новостей
+                {
 
-            thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
+                    thicknessAnimation.From = NewsPanel.Margin;
+                    thicknessAnimation.To = VideoViewAdv.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
+                }
+                else
+                {
+                    thicknessAnimation.From = NewsPanel.Margin;
+                    thicknessAnimation.To = new Thickness(VideoViewAdv.Width / 2, VideoViewAdv.Height, 0, 0);
+                }
 
-            NewsPanel.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
+                thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
+
+            storyboard = new Storyboard();
+            Storyboard.SetTargetName(thicknessAnimation, NewsPanel.Name);
+            Storyboard.SetTargetProperty(thicknessAnimation,
+                new PropertyPath(StackPanel.MarginProperty));
+            storyboard.Children.Add(thicknessAnimation);
+
+            //storyboard.Begin(this);
+            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, 
+                new Action(()=> storyboard.Begin(this)) );
+      
+            // Dispatcher.Invoke(() => { storyboard.Begin(this); });
+
+            // await Dispatcher.InvokeAsync(() => { storyboard.Begin(this); });
+
+            //  await BeginAnimationAsync(this);
+            //NewsPanel.BeginAnimation(StackPanel.MarginProperty, thicknessAnimation);
+
+            //Storyboard storyboard = new Storyboard();
+            //storyboard.Be
+            //  return this;
+
+
+        }
+
+        //private static Task BeginAnimationAsync(Video video)
+        //{
+        //    Storyboard storyboard = video.storyboard;
+        //    TaskCompletionSource<object> source = new TaskCompletionSource<object>();
+        //    storyboard.Completed += delegate
+        //      {
+        //          source.SetResult(null);
+        //      };
+        //    return source.Task;
+        //}
+
+
+        /// <summary>
+        /// Бегущая строка с текстовыми новостями
+        /// </summary>
+        private void CreateNewsRunningLine() 
+        {
+        
         }
 
         private void VideoView_KeyDown(object sender, KeyEventArgs e)
