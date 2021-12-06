@@ -180,7 +180,7 @@ namespace TVTK.Controller
             //}
         }
 
-        public static void StartPlayer() { videoPlayer.Start(); }
+        public static async void StartPlayer() { await videoPlayer.Start(); }
 
         public static void StopNews(object sender, EventArgs e)
         {
