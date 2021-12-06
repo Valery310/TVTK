@@ -137,6 +137,7 @@
     <Compile Include="Controller\Settings.cs" />
     <Compile Include="Model\Entity\TimeOfPlaying.cs" />
     <Compile Include="Controller\TVWol.cs" />
+    <Compile Include="ViewModel\TimeViewModel.cs" />
     <Compile Include="ViewModel\Video.xaml.cs">
       <DependentUpon>Video.xaml</DependentUpon>
     </Compile>

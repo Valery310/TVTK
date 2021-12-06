@@ -110,7 +110,7 @@ namespace TVTK.Controller.Properties {
             mainWindow.tbxPeriodNews.Text = TVTK.Properties.Settings.Default.PeriodNews.ToString(); ;
             mainWindow.tbxDurationNews.Text = TVTK.Properties.Settings.Default.DurationNews.ToString();
             mainWindow.chkbxAutoplay.IsChecked = TVTK.Properties.Settings.Default.Autoplay;
-            mainWindow.tbxTitlePlayer.Text = TVTK.Properties.Settings.Default.TitlePlayer;
+           // mainWindow.tbxTitlePlayer.Text = TVTK.Properties.Settings.Default.TitlePlayer;
 
             Height = TVTK.Properties.Settings.Default.Height;
             Width = TVTK.Properties.Settings.Default.Width;
@@ -156,8 +156,8 @@ namespace TVTK.Controller.Properties {
                 viewModelTime.Add(new TimeOfPlaying { From = DateTimeOffset.Parse("16:00"), Before = DateTimeOffset.Parse("17:00") });
             }
 
-            mainWindow.chbScreenSaver.IsChecked = TVTK.Properties.Settings.Default.ScreenSaver;
-            mainWindow.tbxDurationScreenSaver.Text = TVTK.Properties.Settings.Default.DurationScreenSaver.ToString();
+          //  mainWindow.chbScreenSaver.IsChecked = TVTK.Properties.Settings.Default.ScreenSaver;
+          //  mainWindow.tbxDurationScreenSaver.Text = TVTK.Properties.Settings.Default.DurationScreenSaver.ToString();
 
             //   AudioOutput.GetAudio();
 

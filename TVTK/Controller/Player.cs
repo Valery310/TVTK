@@ -29,38 +29,40 @@ namespace TVTK.Controller
         /// <summary>
         /// Порядок проигрывания файлов в плелистах.
         /// </summary>
-        public static TypePlaying typePlaying { get; private set; }
+        public static TypePlaying TypePlaying { get; private set; }
 
         public static PlayList CurrentPlaylist { get; set; }
 
         //   public static Scheduler scheduler { get; set; }
 
         // static ThreadLocal<Random> random;
-        static Random random;
+        static readonly Random random;
 
         static DispatcherTimer timer;//Таймер для проверки текущего времени и запуска/остановки проигрывания всего контента.
 
 
         static DispatcherTimer timerStartNews;//Таймер для запуска показа новостей.
-        static DispatcherTimer timerEndNews;//Таймер для остановки показа новостей.
+        static readonly DispatcherTimer timerEndNews;//Таймер для остановки показа новостей.
 
-        private static NLog.Logger logger {get;set;}
+        private static NLog.Logger Logger {get;set;}
 
         static Video videoPlayer { get; set; }
 
         static Player() 
         {
 
-            logger = MainWindow.Logger;
+            Logger = MainWindow.Logger;
         //    Scheduler.StartPlaying += StartPlayer;
          //   Scheduler.StopPlaying += StopPlayer;
 
             int seek = Environment.TickCount;
             random = new Random(seek);
 
-            timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 1, 0); //Таймер проверяет время каждую минуту
-                                                    //
+            timer = new DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 1, 0) //Таймер проверяет время каждую минуту
+            };
+            //
             if (TVTK.Properties.Settings.Default.PeriodNews > 0)
             {
                 timerStartNews = new DispatcherTimer();
