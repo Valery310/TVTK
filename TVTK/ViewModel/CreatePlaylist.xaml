@@ -1,0 +1,136 @@
+﻿<Window x:Class="TVTK.ViewModel.CreatePlaylist"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:TVTK.ViewModel" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="CreatePlaylist" Height="516" Width="1339">
+    <Grid Margin="5">
+        <GroupBox Margin="5" Header="Настройка списка воспроизведения">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Margin="10" Orientation="Vertical">
+                        <Label Content="Имя плейлиста"/>
+                        <TextBox></TextBox>
+                    </StackPanel>
+                    <StackPanel>
+                        <GroupBox Header="Управление временем воспроизведения">
+                            <StackPanel Margin="5" Orientation="Vertical">
+                                <TextBlock HorizontalAlignment="Left" Margin="2"  TextWrapping="Wrap" VerticalAlignment="Top" Text="Добавить период работы" Height="16"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock HorizontalAlignment="Left" Margin="2" TextWrapping="Wrap" Text="От" VerticalAlignment="Top" Height="15"/>
+                                    <xctk:TimePicker x:Name="tbxBreakFrom" Margin="2" Text="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay,  StringFormat='HH:mm'}" ShowDropDownButton="True"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock HorizontalAlignment="Left" Margin="2" TextWrapping="Wrap" Text="До" VerticalAlignment="Top" Height="16"/>
+                                    <xctk:TimePicker x:Name="tbxBreakBefore" Margin="2" Text="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay,  StringFormat='HH:mm'}" ShowDropDownButton="True"/>
+                                </StackPanel>
+                                <TextBlock HorizontalAlignment="Left" Margin="2" TextWrapping="Wrap" Text="Период работы" VerticalAlignment="Top" Height="16"/>
+                                <DataGrid x:Name="dgTime" Margin="2" d:ItemsSource="{d:SampleData ItemCount=15}" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="214" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" CanUserResizeColumns="False" CanUserReorderColumns="False" SelectionMode="Single" CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Binding="{Binding From, StringFormat=hh:mm}"  CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105" Header="От"/>
+                                        <DataGridTextColumn Binding="{Binding Before, StringFormat=hh:mm}" CanUserReorder="False" CanUserResize="False" ClipboardContentBinding="{x:Null}" Width="105"  Header="До"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Добавить" Margin="5" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="btnAddTime_Click" Height="19"/>
+                                    <Button Content="Удалить" Margin="5" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="btnDelTime_Click" Height="20"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Управление аудиовыводом">
+                            <StackPanel>
+                                <StackPanel Margin="5" Orientation="Vertical">
+                                    <Label Content="Вывод аудио" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                    <ComboBox Name="cmbbxAudioOutput" d:ItemsSource="{d:SampleData ItemCount=15}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <StackPanel Margin="5" Orientation="Vertical">
+                        <GroupBox Header="Расположение контента">
+                            <StackPanel>
+                                <StackPanel Orientation="Vertical">
+                                    <Label Content="Путь к новостному контенту" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="166"/>
+                                    <StackPanel Margin="5" Orientation="Horizontal">
+                                        <TextBox x:Name="tbxPathNews" HorizontalAlignment="Left" MaxLines="1"  Height="23" Text="" VerticalAlignment="Top" Width="290" IsReadOnlyCaretVisible="True" IsReadOnly="True" Grid.Column="1"/>
+                                        <Button x:Name="btnSetPathNews" Content="..." HorizontalAlignment="Left" VerticalAlignment="Top" Width="30" Height="23" Click="btnSetPathNews_Click" Grid.Column="1"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Vertical">
+                                    <Label Content="Путь к рекламному контенту" HorizontalAlignment="Left"  VerticalAlignment="Top" Height="26" Width="168"/>
+                                    <StackPanel Margin="5" Orientation="Horizontal">
+                                        <TextBox x:Name="tbxPathAdv" HorizontalAlignment="Left" Height="23"  Text="" VerticalAlignment="Top" Width="290" IsReadOnly="True" Grid.Column="1"/>
+                                        <Button x:Name="btnSetPathAdv" Content="..." HorizontalAlignment="Left"  VerticalAlignment="Top" Width="30" RenderTransformOrigin="0.5,0.3" Height="23" Click="btnSetPathAdv_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Padding="5" Header="Параметры новостного контента">
+                            <StackPanel Orientation="Vertical">
+                                <CheckBox x:Name="chbNews" Content="Показывать новости" HorizontalAlignment="Left" VerticalAlignment="Top" Height="15" Width="133"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Частота показа новостей" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="148"/>
+                                    <TextBox x:Name="tbxPeriodNews" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput" Grid.Column="1"/>
+                                    <Label Content="мин." HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="35"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Длительность показа новостей" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="181"/>
+                                    <TextBox x:Name="tbxDurationNews" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="51" PreviewTextInput="tbxWidth_PreviewTextInput" Grid.Column="1"/>
+                                    <Label Content="мин." HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="35"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Параметры окна проигрывания">
+                            <StackPanel Orientation="Vertical">
+                                <Label Content="Расположение окна" HorizontalAlignment="Left"  VerticalAlignment="Top" Height="26" Width="120"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="По оси X" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="59"/>
+                                    <TextBox x:Name="tbxPositionX" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="По оси Y" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="59"/>
+                                    <TextBox x:Name="tbxPositionY" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label x:Name="tblWidth" HorizontalAlignment="Left" Content="Ширина" VerticalAlignment="Top" Height="26" Width="59"/>
+                                    <TextBox x:Name="tbxWidth" HorizontalAlignment="Left" Height="23"  TextWrapping="Wrap" Text="1920" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label x:Name="tblHeight" HorizontalAlignment="Center" Content="Высота" VerticalAlignment="Top" Height="26" Width="59"/>
+                                    <TextBox x:Name="tbxHeight" HorizontalAlignment="Left" Height="23"  TextWrapping="Wrap" Text="1080" VerticalAlignment="Top" Width="120" PreviewTextInput="tbxWidth_PreviewTextInput" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <Button Content="Сохранить"></Button>
+                    </StackPanel>
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="Рекламный плейлист"/>
+                            <ListView x:Name="lvPlFiles" Height="180" Width="450" d:ItemsSource="{d:SampleData ItemCount=15}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="Новостной плейлист"/>
+                            <ListView x:Name="lvPlNews" Height="180" Width="450" d:ItemsSource="{d:SampleData ItemCount=15}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>

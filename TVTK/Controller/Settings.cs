@@ -90,9 +90,9 @@ namespace TVTK.Controller.Properties {
         {
             mainWindow = main;
 
-            mainWindow.tbxPositionX.Text = TVTK.Properties.Settings.Default.PositionX.ToString();
-            mainWindow.tbxPositionY.Text = TVTK.Properties.Settings.Default.PositionY.ToString();
-            mainWindow.chbNews.IsChecked = TVTK.Properties.Settings.Default.News;
+        //    mainWindow.tbxPositionX.Text = TVTK.Properties.Settings.Default.PositionX.ToString();
+        //    mainWindow.tbxPositionY.Text = TVTK.Properties.Settings.Default.PositionY.ToString();
+        //    mainWindow.chbNews.IsChecked = TVTK.Properties.Settings.Default.News;
             mainWindow.tbxIPServer.Text = TVTK.Properties.Settings.Default.AdressServer;
             mainWindow.tbxIPServer_Port.Text = TVTK.Properties.Settings.Default.PortServer.ToString();
             mainWindow.tbxNameClient.Text = TVTK.Properties.Settings.Default.NameClient;
@@ -105,11 +105,11 @@ namespace TVTK.Controller.Properties {
             {
                 TVTK.Properties.Settings.Default.LocalPathNews = Directory.GetCurrentDirectory();
             }
-            mainWindow.tbxPathAdv.Text = TVTK.Properties.Settings.Default.LocalPathAdv;
-            mainWindow.tbxPathNews.Text = TVTK.Properties.Settings.Default.LocalPathNews;
-            mainWindow.tbxPeriodNews.Text = TVTK.Properties.Settings.Default.PeriodNews.ToString(); ;
-            mainWindow.tbxDurationNews.Text = TVTK.Properties.Settings.Default.DurationNews.ToString();
-            mainWindow.chkbxAutoplay.IsChecked = TVTK.Properties.Settings.Default.Autoplay;
+            //mainWindow.tbxPathAdv.Text = TVTK.Properties.Settings.Default.LocalPathAdv;
+            //mainWindow.tbxPathNews.Text = TVTK.Properties.Settings.Default.LocalPathNews;
+            //mainWindow.tbxPeriodNews.Text = TVTK.Properties.Settings.Default.PeriodNews.ToString(); ;
+            //mainWindow.tbxDurationNews.Text = TVTK.Properties.Settings.Default.DurationNews.ToString();
+            //mainWindow.chkbxAutoplay.IsChecked = TVTK.Properties.Settings.Default.Autoplay;
            // mainWindow.tbxTitlePlayer.Text = TVTK.Properties.Settings.Default.TitlePlayer;
 
             Height = TVTK.Properties.Settings.Default.Height;

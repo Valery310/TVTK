@@ -39,6 +39,7 @@ using TVTK.Playlist;
 using TVTK.Enums;
 using NLog.Config;
 using TVTK.Controller.Properties;
+using TVTK.ViewModel;
 //using NAudio.CoreAudioApi;
 
 namespace TVTK
@@ -85,21 +86,21 @@ namespace TVTK
             Scheduler.StartScheduler();
         }
 
-        /// <summary>
-        /// Добавление времени работы
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnAddTime_Click(object sender, RoutedEventArgs e)
-        {
-            var time = new TimeOfPlaying();
-            DateTimeOffset TempTime;
-            DateTimeOffset.TryParse(tbxBreakBefore.Text,out TempTime);
-            time.Before = TempTime;
-            DateTimeOffset.TryParse(tbxBreakBefore.Text, out TempTime);
-            time.From = TempTime; 
-         //   viewModelTime.Add(time);
-        }
+        ///// <summary>
+        ///// Добавление времени работы
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //private void btnAddTime_Click(object sender, RoutedEventArgs e)
+        //{
+        //    var time = new TimeOfPlaying();
+        //    DateTimeOffset TempTime;
+        //    DateTimeOffset.TryParse(tbxBreakBefore.Text,out TempTime);
+        //    time.Before = TempTime;
+        //    DateTimeOffset.TryParse(tbxBreakBefore.Text, out TempTime);
+        //    time.From = TempTime; 
+        // //   viewModelTime.Add(time);
+        //}
 
         /// <summary>
         /// Удаление выделенного времени работы
@@ -146,46 +147,46 @@ namespace TVTK
             Properties.Settings.Default.TypeWork = (uint)typeWork;
         }
 
-        private void btnSetPathNews_Click(object sender, RoutedEventArgs e)
-        {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-            if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathNews))
-            {
-                dialog.InitialDirectory = Properties.Settings.Default.LocalPathNews;
-            }
-            else
-            {
-                dialog.InitialDirectory = Directory.GetCurrentDirectory();
-            }
-            dialog.Multiselect = false;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                tbxPathNews.Text = dialog.FileName;
-                Properties.Settings.Default.LocalPathNews = dialog.FileName;
-            }
-        }
+        //private void btnSetPathNews_Click(object sender, RoutedEventArgs e)
+        //{
+        //    CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+        //    dialog.IsFolderPicker = true;
+        //    if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathNews))
+        //    {
+        //        dialog.InitialDirectory = Properties.Settings.Default.LocalPathNews;
+        //    }
+        //    else
+        //    {
+        //        dialog.InitialDirectory = Directory.GetCurrentDirectory();
+        //    }
+        //    dialog.Multiselect = false;
+        //    if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+        //    {
+        //        tbxPathNews.Text = dialog.FileName;
+        //        Properties.Settings.Default.LocalPathNews = dialog.FileName;
+        //    }
+        //}
 
-        private void btnSetPathAdv_Click(object sender, RoutedEventArgs e)
-        {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-            if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
-            {
-                dialog.InitialDirectory = Properties.Settings.Default.LocalPathAdv;
-            }
-            else
-            {
-                dialog.InitialDirectory = Directory.GetCurrentDirectory();
-            }      
-            dialog.Multiselect = false;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                tbxPathAdv.Text = dialog.FileName;
-                Properties.Settings.Default.LocalPathAdv = dialog.FileName;
+        //private void btnSetPathAdv_Click(object sender, RoutedEventArgs e)
+        //{
+        //    CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+        //    dialog.IsFolderPicker = true;
+        //    if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.LocalPathAdv))
+        //    {
+        //        dialog.InitialDirectory = Properties.Settings.Default.LocalPathAdv;
+        //    }
+        //    else
+        //    {
+        //        dialog.InitialDirectory = Directory.GetCurrentDirectory();
+        //    }      
+        //    dialog.Multiselect = false;
+        //    if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+        //    {
+        //        tbxPathAdv.Text = dialog.FileName;
+        //        Properties.Settings.Default.LocalPathAdv = dialog.FileName;
 
-            }
-        }
+        //    }
+        //}
 
         private void btnWOLTV_Click(object sender, RoutedEventArgs e)
         {
@@ -288,6 +289,21 @@ namespace TVTK
         {
             Player.StartNews(sender, new EventArgs());
         }
-        
+
+        private void btnCreatePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            CreatePlaylist NewPlalyst = new CreatePlaylist();
+            NewPlalyst.Show();
+        }
+
+        private void btnEditPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnDeletePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
