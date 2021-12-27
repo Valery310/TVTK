@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -237,15 +238,30 @@ namespace TVTK.Controller
             return new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
         }
 
-        public static void CreatePlayer()
+        public static async Task CreatePlayer()
         {
-           // LibVLCSharp.Shared.Core.Initialize();
+            //Dispatcher.CurrentDispatcher.BeginInvoke((Action)delegate
+            //{ videoPlayer = new Video(); });
 
-            videoPlayer = new Video();
-          //  VideoView VideoViewAdv = videoPlayer.VideoViewAdv;
+            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+              new Action(() => videoPlayer = new Video()));
 
-            
-            
+            //Application.Current.Dispatcher.Invoke((Action)delegate {
+            //    videoPlayer = new Video();
+            //});
+
+            //Thread t = new Thread(ThreadProc);
+            //t.SetApartmentState(ApartmentState.STA);
+
+            //t.Start();
+
+            // LibVLCSharp.Shared.Core.Initialize();
+            //    Task.Run(() =>
+            //    videoPlayer = new Video());
+            //  //  VideoView VideoViewAdv = videoPlayer.VideoViewAdv;
+
+
+
         }
 
 

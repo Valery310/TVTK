@@ -72,10 +72,10 @@
             </Grid>
         </TabItem>
         <TabItem Name="TabPlaylist" Header="Плейлисты">
-            <Grid Margin="5,0,0,0" HorizontalAlignment="Left" Width="1308">
+            <Grid Margin="5,0,0,0" HorizontalAlignment="Left" >
                 <GroupBox Margin="5,5,5,5" Header="Управление плейлистами">
                     <Grid>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,269,0">
+                        <StackPanel Orientation="Horizontal">
                             <StackPanel Margin="10" Orientation="Vertical">
                                 <Label Content="Список всех плейлистов"/>
                                 <ListView x:Name="lvAllPlaylist" Width="200" MinHeight="100" d:ItemsSource="{d:SampleData ItemCount=15}">

@@ -83,7 +83,8 @@ namespace TVTK
         /// <param name="e"></param>
         private void ButtonStart_Click(object sender, RoutedEventArgs e)
         {
-            Scheduler.StartScheduler();
+            Player.CreatePlayer();
+          //  Scheduler.StartScheduler();
         }
 
         ///// <summary>

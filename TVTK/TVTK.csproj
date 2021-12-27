@@ -127,6 +127,8 @@
     <Compile Include="Controller\Scheduler.cs" />
     <Compile Include="Model\Entity\Dates.cs" />
     <Compile Include="Model\Entity\PlayListByTypeContent.cs" />
+    <Compile Include="Model\Entity\SettingPlaylist.cs" />
+    <Compile Include="Model\Entity\SettingProgram.cs" />
     <Compile Include="Model\Enums\Enumirable.cs" />
     <Compile Include="ObservableDictionary.cs" />
     <Compile Include="Model\Playlist\FileList.cs" />

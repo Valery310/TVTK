@@ -24,11 +24,30 @@ namespace TVTK.ViewModel
     /// </summary>
     public partial class Video : Window
     {
-        DispatcherTimer timerDurationShowNews;//таймер времени показа одной новости.
-        bool playing = false; // маркер, позволяющий определить текущее состояние проигрывателя видео/рекламы
-        public bool showNews = false; //маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
-        bool StartWithoutTime = false; // маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
-        Video window;//окно проигрывателя рекламы/видео
+        /// <summary>
+        /// Таймер времени показа одной новости.
+        /// </summary>
+        DispatcherTimer timerDurationShowNews;
+
+        /// <summary>
+        /// Маркер, позволяющий определить текущее состояние проигрывателя видео/рекламы
+        /// </summary>
+        bool playing = false;
+
+        /// <summary>
+        /// Маркер, похволяющий определить текущее состояние показа новостей. Нужен для таймеров во избежание пвовторного запуска новостей.
+        /// </summary>
+        public bool showNews = false;
+
+        /// <summary>
+        /// Маркер, позволяющий определить тип запуска проигрывания. Варианты: проверять время и соблюдать время работы/ Проигрывать постоянно.
+        /// </summary>
+        bool StartWithoutTime = false;
+
+        /// <summary>
+        /// Окно проигрывателя рекламы/видео
+        /// </summary>
+        Video window;
 
         List<List<MediaFile>> settingFromServer;
         ScreenSaver screenSaver;
@@ -145,17 +164,33 @@ namespace TVTK.ViewModel
             throw new NotImplementedException();
         }
 
-        public async Task<bool> StartAdv()
+        public async Task<bool> Start()
         {
             try
             {
                 // var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
                 //  var media = new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
                 var media = new Media(libVLC, new Uri("C:\\Users\\valer\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\dr.jpg"));
-                if (window.VideoViewAdv.IsLoaded)
+                VideoView videoView = null;
+
+                if (showNews)
                 {
-                   
-                    window.VideoViewAdv.MediaPlayer.Play(media);
+                    videoView = VideoViewNews;
+                }
+                else
+                {
+                    videoView = VideoViewAdv;
+                }
+                if (videoView.IsLoaded)
+                {
+
+                    videoView.MediaPlayer.Play(media);
+
+                    if (showNews)
+                    {
+                        window.Visibility = Visibility.Visible;
+                        AnimationNews();
+                    }
                     //this.VideoViewAdv.MediaPlayer.Play(new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")));
                     //  this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
 
@@ -174,39 +209,46 @@ namespace TVTK.ViewModel
             }
         }
 
-        public async Task<bool> Start()
-        {
-           await StartAdv();
-           await StartNews();
-           return false;
-        }
+        //public async Task<bool> Start()
+        //{
+        //    if (await StartAdv() || await StartNews())
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
 
-        public async Task<bool> StartNews()
-        {
-            try
-            {
-                // var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
-                var media = new Media(libVLC, new Uri("C:\\Users\\valer\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
-                if (window.VideoViewNews.IsLoaded)
-                {
-                    window.VideoViewNews.MediaPlayer.Play(media);
-                    //this.VideoViewAdv.MediaPlayer.Play(new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")));
-                    //  this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
-                    AnimationNews();
-                    return true;
-                }
-                else
-                {
-                    MessageBox.Show("Плеер еще не загрузился");
-                    return false;
-                }
+        //public async Task<bool> StartNews()
+        //{
+        //    try
+        //    {
+        //        window.Visibility = Visibility.Visible;
 
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+        //        // var media = new Media(libVLC, new Uri("C:\\Users\\Kryukov.vn\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+        //        var media = new Media(libVLC, new Uri("C:\\Users\\valer\\source\\repos\\Valery310\\TVTK\\TVTK\\bin\\Debug\\Test\\gigiena.mp4"));
+        //        if (window.VideoViewNews.IsLoaded)
+        //        {
+        //            window.VideoViewNews.MediaPlayer.Play(media);
+        //            //this.VideoViewAdv.MediaPlayer.Play(new Media(libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")));
+        //            //  this.mediaPlayerAdv.Play(Player.GetNextMedia(this.libVLC));
+        //            AnimationNews();
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("Плеер еще не загрузился");
+        //            return false;
+        //        }
+
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return false;
+        //    }
+        //}
 
         void CreateAdvWindow()
         {
@@ -256,7 +298,7 @@ namespace TVTK.ViewModel
         {
           //  window.VideoViewNews.Loaded += VideoViewNews_Loaded;
          //   VideoViewNews.Unloaded += VideoView_Unloaded;
-
+          
             NewsPanel.Width = VideoViewCanvas.Width;
             NewsPanel.Height = VideoViewCanvas.Height;
 
@@ -283,13 +325,14 @@ namespace TVTK.ViewModel
 
             NewsPanel.Margin = new Thickness(VideoViewCanvas.Width / 2, VideoViewCanvas.Height, -NewsPanel.Width, 0);
 
-            VideoViewCanvas.Children[1].Visibility = Visibility.Visible;
-            VideoViewNews.Visibility = Visibility.Visible;
-            NewsPanel.Visibility = Visibility.Visible;
+            //VideoViewCanvas.Children[1].Visibility = Visibility.Visible;
+            //VideoViewNews.Visibility = Visibility.Visible;
+            //NewsPanel.Visibility = Visibility.Visible;
 
+            VideoViewNews.Visibility = Visibility.Collapsed;
             // NewsPanel.KeyDown += ContentControlNews_KeyDown;
             //  VideoViewCanvas.KeyDown += Canvas_KeyDown;
-            
+
         }
 
         
@@ -511,40 +554,48 @@ namespace TVTK.ViewModel
         public async void AnimationNews()//Выезд и уход за экран окна новостей. Проверяет текущее состояние новостей и выполняет требуемые действияю
         {
 
-            
-          
-                //  Canvas canvas = window.Content as Canvas;
-                //  StackPanel contentControlNews = canvas.Children[3] as StackPanel;
-                ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
-                SineEase se = new SineEase();
-                se.EasingMode = EasingMode.EaseInOut;
-                thicknessAnimation.EasingFunction = se;
-                thicknessAnimation.DecelerationRatio = 0.5;
 
-                if (showNews == true)//если истина, то выводим экран новостей
-                {
 
-                    thicknessAnimation.From = NewsPanel.Margin;
-                    thicknessAnimation.To = VideoViewAdv.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
-                }
-                else
-                {
-                    thicknessAnimation.From = NewsPanel.Margin;
-                    thicknessAnimation.To = new Thickness(VideoViewAdv.Width / 2, VideoViewAdv.Height, 0, 0);
-                }
+            //  Canvas canvas = window.Content as Canvas;
+            //  StackPanel contentControlNews = canvas.Children[3] as StackPanel;
+            ThicknessAnimation thicknessAnimation = new ThicknessAnimation();
+            SineEase se = new SineEase();
+            se.EasingMode = EasingMode.EaseInOut;
+            thicknessAnimation.EasingFunction = se;
+            thicknessAnimation.DecelerationRatio = 0.5;
 
-                thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
+            if (showNews == true)//если истина, то выводим экран новостей
+            {
+                thicknessAnimation.From = NewsPanel.Margin;
+                thicknessAnimation.To = VideoViewAdv.Margin;// new Thickness(canvas.ma, canvas.Height / 2, 0, 0);
+            }
+            else
+            {
+                thicknessAnimation.From = NewsPanel.Margin;
+                thicknessAnimation.To = new Thickness(VideoViewAdv.Width / 2, VideoViewAdv.Height, 0, 0);
+            }
+
+            thicknessAnimation.Duration = TimeSpan.FromSeconds(3);
 
             storyboard = new Storyboard();
             Storyboard.SetTargetName(thicknessAnimation, NewsPanel.Name);
             Storyboard.SetTargetProperty(thicknessAnimation,
                 new PropertyPath(StackPanel.MarginProperty));
             storyboard.Children.Add(thicknessAnimation);
+            storyboard.Completed += Storyboard_Completed;
 
-            //storyboard.Begin(this);
-            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, 
-                new Action(()=> storyboard.Begin(this)) );
-      
+            if (showNews == true)//если истина, то выводим экран новостей
+            {
+                VideoViewNews.Visibility = Visibility.Visible;
+            }
+
+            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                new Action(() => { 
+                    storyboard.Begin(this);                 
+                }));
+
+           
+
             // Dispatcher.Invoke(() => { storyboard.Begin(this); });
 
             // await Dispatcher.InvokeAsync(() => { storyboard.Begin(this); });
@@ -557,6 +608,14 @@ namespace TVTK.ViewModel
             //  return this;
 
 
+        }
+
+        private void Storyboard_Completed(object sender, EventArgs e)
+        {
+            if (showNews == true)//если истина, то выводим экран новостей
+            {
+                VideoViewNews.Visibility = Visibility.Collapsed;
+            }
         }
 
         //private static Task BeginAnimationAsync(Video video)
